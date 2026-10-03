@@ -190,6 +190,75 @@ h1{font-size:.95rem}
 [data-theme=dark] .alert-info,[data-theme=dark] .alert-lung,[data-theme=dark] .badge-ok{background:#16302e;color:#a9dcd5;border-color:#2f5f5a}
 [data-theme=dark] .result-unit,[data-theme=dark] .result-note,[data-theme=dark] .hint{color:#9fb8b4}}
 .help-section{overflow-x:auto}.help-section h4{margin:14px 0 6px;font-size:.9rem}
+/* ===== About Page ===== */
+.about-profile {
+  text-align: center;
+  padding: 18px 0 10px;
+}
+.about-avatar {
+  font-size: 3.5rem;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+.about-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-dark);
+}
+.about-role {
+  font-size: .9rem;
+  color: #5a7a7a;
+  margin-top: 2px;
+}
+.about-contact {
+  text-align: center;
+  margin: 18px 0 8px;
+}
+.about-contact-label {
+  font-size: .85rem;
+  font-weight: 600;
+  color: #2c4a4a;
+  margin-bottom: 8px;
+}
+.btn-whatsapp {
+  background: #25d366;
+  color: #fff;
+  text-decoration: none;
+  display: block;
+  width: 100%;
+  padding: 14px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 10px;
+  text-align: center;
+  transition: background .2s;
+}
+.btn-whatsapp:active {
+  background: #1da851;
+}
+.about-hint {
+  font-size: .72rem;
+  color: #8aa0a0;
+  margin-top: 8px;
+}
+.about-app-info {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--border);
+  font-size: .8rem;
+  color: #3a5a5a;
+}
+.about-app-info p {
+  margin: 4px 0;
+}
+/* Dark mode */
+[data-theme=dark] .about-app-info {
+  color: var(--text);
+  border-top-color: #33423f;
+}
+[data-theme=dark] .about-contact-label {
+  color: var(--text);
+}
 </style>
 </head>
 <body>
@@ -216,6 +285,7 @@ h1{font-size:.95rem}
 <button class="tab-util" data-page="body" role="tab">⚖️ <span data-i18n="tab_body">المؤشرات الجسدية</span></button>
 <button class="tab-util" data-page="ponv" role="tab">🧠 <span data-i18n="tab_ponv">حاسبة PONV</span></button>
 <button class="tab-util" data-page="help" role="tab">❓ <span data-i18n="tab_help">المساعدة</span></button>
+<button class="tab-util" data-page="about" role="tab">👩‍⚕️ <span data-i18n="tab_about">حول</span></button>
 </nav>
 </header>
 
@@ -473,6 +543,36 @@ h1{font-size:.95rem}
 </div>
 </section>
 
+<!-- ============ PAGE ABOUT ============ -->
+<section class="page" id="page-about" role="tabpanel">
+<div class="card">
+<h2>👩‍⚕️ <span data-i18n="about_title">حول المطوّرة</span></h2>
+
+<div class="about-profile">
+  <div class="about-avatar">👩‍⚕️</div>
+  <div class="about-name">مريم فاضل هلال</div>
+  <div class="about-role">مساعد تخدير</div>
+</div>
+
+<div class="about-contact">
+  <p class="about-contact-label">للتواصل:</p>
+  <a class="btn btn-whatsapp"
+     href="https://wa.me/9647736530481?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D9%88%D8%AF%20%D8%A7%D9%84%D8%A7%D8%B3%D8%AA%D9%81%D8%B3%D8%A7%D8%B1%20%D8%B9%D9%86%20%D8%AD%D8%A7%D8%B3%D8%A8%D8%A9%20%D8%AC%D8%B1%D8%B9%D8%A7%D8%AA%20%D8%A7%D9%84%D8%AA%D8%AE%D8%AF%D9%8A%D8%B1"
+     target="_blank" rel="noopener noreferrer">
+    💬 واتساب: ‎+964 773 653 0481
+  </a>
+  <p class="about-hint">اضغط على الرقم لفتح محادثة واتساب مباشرة</p>
+</div>
+
+<div class="about-app-info">
+  <p><strong>اسم التطبيق:</strong> حاسبة جرعات التخدير</p>
+  <p><strong>الإصدار:</strong> 10</p>
+  <p><strong>الغرض:</strong> أداة حسابية مساعدة لأطباء ومساعدي التخدير</p>
+</div>
+</div>
+</section>
+   
+   
 <div class="warning no-print">
 <strong>⚠️ <span data-i18n="warning_title">تنبيه طبي مهم:</span></strong> <span data-i18n="warning_text">هذا البرنامج أداة حسابية مساعدة فقط. الجرعات إرشادية عامة، ويجب على طبيب التخدير تحديد الجرعة النهائية وفقاً لحالة المريض.</span>
 </div>
@@ -504,8 +604,8 @@ var I18N = {
 ar: {
 app_title: "حاسبة جرعات التخدير",
 tab_patient: "بيانات المريض", tab_clinical: "التقييم السريري", tab_drug: "الدواء والجرعة", tab_result: "النتيجة",
-tab_body: "المؤشرات الجسدية", tab_ponv: "حاسبة PONV", tab_help: "المساعدة",
-patient_title: "بيانات المريض",
+tab_body: "المؤشرات الجسدية", tab_ponv: "حاسبة PONV", tab_help: "المساعدة", tab_about: "حول",
+about_title: "حول المطوّرة",patient_title: "بيانات المريض",
 weight_label: "الوزن (كغ)", weight_ph: "مثال: 70", weight_err: "الرجاء إدخال وزن صحيح (1 – 300 كغ)",
 height_label: "الطول (سم)", height_ph: "مثال: 170",
 age_label: "العمر (سنة)", age_ph: "مثال: 45", age_err: "الرجاء إدخال عمر صحيح (0 – 120)",
@@ -734,8 +834,8 @@ help_html: `<div class="help-section">
 en: {
 app_title: "Anesthesia Dose Calculator",
 tab_patient: "Patient Data", tab_clinical: "Clinical Assessment", tab_drug: "Drug & Dose", tab_result: "Result",
-tab_body: "Body Metrics", tab_ponv: "PONV Calculator", tab_help: "Help",
-patient_title: "Patient Data",
+tab_body: "Body Metrics", tab_ponv: "PONV Calculator", tab_help: "Help", tab_about: "About",
+about_title: "About the Developer",patient_title: "Patient Data",
 weight_label: "Weight (kg)", weight_ph: "e.g. 70", weight_err: "Please enter a valid weight (1 – 300 kg)",
 height_label: "Height (cm)", height_ph: "e.g. 170",
 age_label: "Age (years)", age_ph: "e.g. 45", age_err: "Please enter a valid age (0 – 120)",
