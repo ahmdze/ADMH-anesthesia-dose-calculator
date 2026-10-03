@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#0d6e6e"><link rel="apple-touch-icon" href="icon-192.png"><meta name="apple-mobile-web-app-capable" content="yes">
+<script>try{var m=localStorage.getItem("anesthesia_calc_v8_theme")||"system";if(m=="dark"||(m=="system"&&matchMedia("(prefers-color-scheme: dark)").matches))document.documentElement.setAttribute("data-theme","dark")}catch(e){}</script>
+<title>حاسبة جرعات التخدير | Anesthesia Dose Calculator</title>
+<style>
+:root{--primary:#0d6e6e;--primary-dark:#095050;--bg:#f4f7f6;--card:#fff;--text:#1a2e2e;--border:#d0ddda;--danger:#c0392b;--success:#1e8449;--purple:#6a4c93;--heart:#b03030;--lung:#2a6f97;--gold:#b8860b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:'Segoe UI',Tahoma,Arial,sans-serif;background:var(--bg);color:var(--text);margin:0;padding:0;line-height:1.6;font-size:16px;min-height:100vh}
+.app{max-width:640px;margin:0 auto;padding:0 12px 90px}
+
+/* Header */
+.top-bar{background:linear-gradient(180deg,#fff,#f0f7f5);border-bottom:1px solid var(--border);padding:10px 12px 0;position:sticky;top:0;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.header-row{display:flex;justify-content:space-between;align-items:center;gap:10px;max-width:640px;margin:0 auto}
+h1{font-size:1.05rem;color:var(--primary-dark);margin:0;flex:1;line-height:1.3}
+.lang-toggle{display:flex;gap:4px;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:2px}
+.lang-btn{padding:6px 12px;font-size:.78rem;font-weight:700;border:0;background:transparent;color:var(--primary-dark);border-radius:6px;cursor:pointer;transition:.15s}
+.lang-btn.active{background:var(--primary);color:#fff}
+.tabs-wizard{display:flex;gap:4px;max-width:640px;margin:8px auto 0;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.tabs-wizard::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;padding:8px 12px;font-size:.75rem;font-weight:600;border:1.5px solid var(--border);background:#fff;color:#4a6a6a;border-radius:8px;cursor:pointer;white-space:nowrap;transition:.15s}
+.tab.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.tab .step-num{display:inline-block;background:rgba(255,255,255,.3);padding:0 5px;border-radius:4px;margin-inline-end:3px;font-weight:700}
+.tab:not(.active) .step-num{background:#e8f0ee;color:var(--primary-dark)}
+.tabs-util{display:flex;gap:6px;max-width:640px;margin:4px auto 0;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
+.tabs-util::-webkit-scrollbar{display:none}
+.tab-util{flex:0 0 auto;padding:6px 11px;font-size:.72rem;font-weight:600;border:1px solid var(--border);background:#fff;color:#5a7a7a;border-radius:16px;cursor:pointer;white-space:nowrap;transition:.15s}
+.tab-util.active{background:var(--purple);color:#fff;border-color:var(--purple)}
+
+/* Pages */
+.page{display:none;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin:14px 0;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.card h2{font-size:1rem;margin:0 0 12px;color:var(--primary);border-bottom:1px solid var(--border);padding-bottom:8px;display:flex;align-items:center;gap:6px}
+
+/* Fields */
+.field{margin-bottom:14px}.field:last-child{margin-bottom:0}
+label{display:block;font-size:.85rem;font-weight:600;margin-bottom:5px;color:#2c4a4a}
+input[type=number],select{width:100%;padding:11px 12px;font-size:1rem;border:1.5px solid var(--border);border-radius:8px;background:#fafcfb;color:var(--text);outline:0;transition:border-color .2s;-webkit-appearance:none;appearance:none;font-family:inherit}
+input[type=number]:focus,select:focus{border-color:var(--primary);background:#fff}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%230d6e6e' stroke-width='1.8' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:left 12px center;padding-left:32px}
+html[dir=ltr] select{background-position:right 12px center;padding-left:12px;padding-right:32px}
+select:disabled{opacity:.5}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.section-label{font-size:.72rem;font-weight:700;color:var(--primary-dark);text-transform:uppercase;letter-spacing:.5px;margin:16px 0 8px;padding-bottom:4px;border-bottom:1px dashed var(--border)}
+.section-label.heart{color:var(--heart);border-bottom-color:#e6a9a2}
+.section-label.lung{color:var(--lung);border-bottom-color:#a9c7db}
+.hint{font-size:.74rem;color:#6a8a8a;margin-top:4px;display:block;line-height:1.4}
+
+/* Stepper */
+.stepper-wrap{display:flex;align-items:stretch;gap:6px}
+.stepper-wrap input{flex:1;text-align:center;min-width:0}
+.stepper-btn{width:44px;min-height:44px;font-size:1.3rem;font-weight:700;border:1.5px solid var(--border);border-radius:8px;background:#f0f7f5;color:var(--primary-dark);cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-appearance:none;user-select:none;line-height:1}
+.stepper-btn:active{background:#d5e8e4}
+
+/* Info grid */
+.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.info-item{background:#f0f7f5;border:1px solid var(--border);border-radius:8px;padding:10px 6px;text-align:center}
+.info-item .lbl{font-size:.7rem;color:#5a7a7a;display:block;line-height:1.3}
+.info-item .val{font-size:1.15rem;font-weight:700;color:var(--primary-dark);display:block}
+.info-item .sub{font-size:.62rem;color:#7a9a9a;display:block}
+
+/* Result */
+.result-box{background:#eaf5f3;border:1.5px solid var(--primary);border-radius:10px;padding:16px;text-align:center;margin-top:10px}
+.result-value{font-size:2rem;font-weight:700;color:var(--primary-dark);line-height:1.2;word-break:break-all}
+.result-unit{font-size:.9rem;color:#4a6a6a;margin-top:2px}
+.result-note{font-size:.78rem;color:#7a9a9a;margin-top:8px}
+.result-weight{font-size:.8rem;color:var(--primary-dark);margin-top:8px;background:#fff;border:1px dashed #9fc9c3;border-radius:6px;padding:8px}
+.result-factors{font-size:.78rem;color:#4a3a1a;margin-top:8px;background:#fdf6e3;border:1px solid #e6c85a;border-radius:6px;padding:10px;text-align:start;line-height:1.7}
+.factor-line{display:block}
+.f-heart{color:var(--heart);font-weight:600}.f-lung{color:var(--lung);font-weight:600}
+.f-asa{color:var(--purple);font-weight:600}.f-thyroid{color:var(--gold);font-weight:600}.f-smoke{color:#8a5a1a;font-weight:600}
+
+/* PONV */
+.checkbox-group{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.checkbox-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:#fafcfb;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:all .15s;user-select:none}
+.checkbox-item:hover{background:#f0f7f5}
+.checkbox-item.checked{background:#f3eef8;border-color:var(--purple)}
+.checkbox-item input[type=checkbox]{width:20px;height:20px;min-width:20px;accent-color:var(--purple);cursor:pointer;margin:0}
+.checkbox-item .cb-label{font-size:.85rem;font-weight:500}
+.ponv-result{background:#f3eef8;border:1.5px solid var(--purple);border-radius:10px;padding:14px;text-align:center;margin-top:12px}
+.ponv-score{font-size:2.2rem;font-weight:700;color:var(--purple);line-height:1}
+.ponv-risk{font-size:1rem;font-weight:600;color:var(--purple);margin-top:4px}
+.ponv-recommend{font-size:.82rem;color:#5a4a6a;margin-top:8px;line-height:1.5}
+
+/* Buttons */
+.btn{display:block;width:100%;padding:14px;font-size:1.02rem;font-weight:700;border:0;border-radius:10px;background:var(--primary);color:#fff;cursor:pointer;transition:background .2s;font-family:inherit}
+.btn:active{background:var(--primary-dark)}
+.btn-ponv{background:var(--purple)}
+.btn-ponv:active{background:#4a3568}
+.btn-print{display:block;width:100%;padding:12px;font-size:.92rem;font-weight:700;border:1.5px solid var(--primary);border-radius:10px;background:#fff;color:var(--primary);cursor:pointer;margin-top:10px;font-family:inherit}
+.btn-print:active{background:#eaf5f3}
+
+/* Wizard nav */
+.wizard-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);padding:10px;display:flex;gap:10px;z-index:99;box-shadow:0 -2px 8px rgba(0,0,0,.06);max-width:640px;margin:0 auto}
+.wizard-nav.hidden{display:none}
+.wizard-nav button{flex:1;padding:12px;font-size:.95rem;font-weight:700;border-radius:10px;border:1.5px solid var(--primary);background:#fff;color:var(--primary);cursor:pointer;font-family:inherit}
+.wizard-nav button.primary{background:var(--primary);color:#fff}
+.wizard-nav button:disabled{opacity:.35;cursor:not-allowed}
+
+/* Alerts */
+.alert{border-radius:8px;padding:10px 12px;font-size:.79rem;line-height:1.55;margin-top:8px}
+.alert-danger{background:#fdecea;border:1px solid #e6a9a2;color:#8a2a20}
+.alert-warn{background:#fdf6e3;border:1px solid #e6c85a;color:#7a5a1a}
+.alert-info{background:#eaf5f3;border:1px solid #9fc9c3;color:#1a4a4a}
+.alert-heart{background:#fdeaea;border:1px solid #d68c8c;color:#7a1f1f}
+.alert-lung{background:#eaf2f8;border:1px solid #8cb4d1;color:#1a4a6a}
+.alert strong{font-weight:700}
+
+/* Warning & footer */
+.warning{background:#fdf6e3;border:1px solid #e6c85a;border-radius:10px;padding:12px;font-size:.78rem;color:#7a5a1a;margin:14px 0;line-height:1.55}
+.warning strong{color:var(--danger)}
+.footer{text-align:center;font-size:.7rem;color:#8aa0a0;padding:10px 0 20px}
+.error-msg{color:var(--danger);font-size:.78rem;margin-top:4px;display:none}
+.error-msg.show{display:block}
+.hidden{display:none!important}
+.clinical-note{font-size:.72rem;color:#5a7a7a;background:#f8fbfa;border-inline-start:3px solid var(--primary);padding:8px;border-radius:6px;margin-top:6px;line-height:1.5}
+
+/* Help */
+.help-section{margin-bottom:18px}
+.help-section h3{color:var(--primary-dark);font-size:.95rem;margin:0 0 8px;border-bottom:1px solid var(--border);padding-bottom:5px}
+.help-section p{font-size:.82rem;color:#3a5a5a;margin:6px 0;line-height:1.6}
+.help-section ul{padding-inline-start:18px;margin:6px 0}
+.help-section li{font-size:.81rem;color:#3a5a5a;margin:3px 0;line-height:1.5}
+.help-table{width:100%;border-collapse:collapse;margin:8px 0;font-size:.76rem}
+.help-table th,.help-table td{border:1px solid var(--border);padding:6px 8px;text-align:start;vertical-align:top}
+.help-table th{background:#eaf5f3;font-weight:700;color:var(--primary-dark)}
+.help-table tr:nth-child(even) td{background:#fafcfb}
+.help-badge{display:inline-block;padding:1px 6px;border-radius:4px;font-size:.68rem;font-weight:700;margin-inline-end:4px}
+.badge-danger{background:#fdecea;color:#8a2a20}
+.badge-warn{background:#fdf6e3;color:#7a5a1a}
+.badge-ok{background:#eaf5f3;color:#1a4a4a}
+
+/* Print Report (A4) */
+.print-report{display:none}
+@media print{
+@page{size:A4 portrait;margin:10mm}
+html,body{background:#fff!important;color:#000!important;font-size:9pt!important;padding:0!important;margin:0!important}
+.top-bar,.app,.wizard-nav,.warning,.footer,.no-print,.print-only-hide{display:none!important}
+.print-report{display:block!important;font-family:'Segoe UI',Tahoma,Arial,sans-serif;color:#000;font-size:9pt;line-height:1.35}
+.pr-header{border-bottom:2px solid #0d6e6e;padding-bottom:6px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.pr-header h1{font-size:14pt;margin:0;color:#095050}
+.pr-header .pr-meta{font-size:8pt;text-align:end;color:#555}
+.pr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.pr-col{display:flex;flex-direction:column;gap:6px}
+.pr-block{border:1px solid #bbb;border-radius:6px;padding:6px 8px;break-inside:avoid;page-break-inside:avoid}
+.pr-block h3{font-size:9.5pt;margin:0 0 4px;color:#0d6e6e;border-bottom:1px solid #ddd;padding-bottom:2px}
+.pr-table{width:100%;border-collapse:collapse;font-size:8.5pt}
+.pr-table td{padding:2px 4px;vertical-align:top;border-bottom:1px dotted #ddd}
+.pr-table td:first-child{color:#555;width:45%;font-weight:600}
+.pr-table tr:last-child td{border-bottom:0}
+.pr-result{background:#eaf5f3!important;border:1.5px solid #0d6e6e;border-radius:8px;padding:10px;text-align:center;break-inside:avoid}
+.pr-result-value{font-size:18pt;font-weight:700;color:#095050;line-height:1.1}
+.pr-result-unit{font-size:9pt;color:#4a6a6a}
+.pr-result-note{font-size:8pt;color:#666;margin-top:4px}
+.pr-factors{background:#fdf6e3!important;border:1px solid #e6c85a;border-radius:6px;padding:6px 8px;font-size:8.5pt;margin-top:6px;break-inside:avoid}
+.pr-signature{margin-top:12px;border-top:1px solid #000;padding-top:6px;display:flex;justify-content:space-between;font-size:9pt}
+.pr-warnings{border:1px solid #d68c8c;background:#fdeaea!important;border-radius:6px;padding:6px 8px;font-size:8pt;color:#7a1f1f;margin-top:6px;break-inside:avoid}
+.pr-warnings strong{color:#8a2a20}
+}
+
+@media (max-width:400px){
+body{font-size:15px}
+h1{font-size:.95rem}
+.tab{font-size:.7rem;padding:7px 9px}
+.info-item .val{font-size:1rem}
+.result-value{font-size:1.6rem}
+}
+
+/* ===== v9 additions: types, dark mode ===== */
+.theme-btn{border:1px solid var(--border);background:#fff;border-radius:8px;padding:5px 10px;font-size:1rem;cursor:pointer}
+#page-drug{--tc:#1f6feb}#page-drug[data-type=regional]{--tc:#2e9d4f}#page-drug[data-type=eye]{--tc:#b8860b}#page-drug[data-type=emergency]{--tc:#c0392b}
+#page-drug .card{border-top:5px solid var(--tc)}#anType,#drug{border-inline-start:6px solid var(--tc)}
+@media screen{
+[data-theme=dark]{--bg:#12181a;--card:#1c2528;--text:#e3ebe9;--border:#33423f;--primary-dark:#7fd1c8}
+[data-theme=dark] .top-bar{background:#162023}
+[data-theme=dark] .theme-btn,[data-theme=dark] .lang-toggle,[data-theme=dark] .tab:not(.active),[data-theme=dark] .tab-util:not(.active),[data-theme=dark] .result-weight,[data-theme=dark] .btn-print,[data-theme=dark] .wizard-nav,[data-theme=dark] .wizard-nav button:not(.primary){background:var(--card);color:var(--text)}
+[data-theme=dark] input[type=number],[data-theme=dark] select{background:#232e31;color:var(--text)}
+[data-theme=dark] label,[data-theme=dark] .help-section p,[data-theme=dark] .help-section li{color:var(--text)}
+[data-theme=dark] .stepper-btn,[data-theme=dark] .info-item,[data-theme=dark] .result-box,[data-theme=dark] .checkbox-item,[data-theme=dark] .clinical-note,[data-theme=dark] .help-table th,[data-theme=dark] .help-table tr:nth-child(even) td,[data-theme=dark] .ponv-result{background:#243033;color:var(--text)}
+[data-theme=dark] .tab:not(.active) .step-num{background:#33423f;color:var(--text)}
+[data-theme=dark] .alert-danger,[data-theme=dark] .alert-heart,[data-theme=dark] .badge-danger{background:#3a1f1c;color:#f3b8b0;border-color:#7a3a33}
+[data-theme=dark] .alert-warn,[data-theme=dark] .warning,[data-theme=dark] .result-factors,[data-theme=dark] .badge-warn{background:#3a3118;color:#f0d98a;border-color:#7a6a2a}
+[data-theme=dark] .alert-info,[data-theme=dark] .alert-lung,[data-theme=dark] .badge-ok{background:#16302e;color:#a9dcd5;border-color:#2f5f5a}
+[data-theme=dark] .result-unit,[data-theme=dark] .result-note,[data-theme=dark] .hint{color:#9fb8b4}}
+.help-section{overflow-x:auto}.help-section h4{margin:14px 0 6px;font-size:.9rem}
+</style>
+</head>
+<body>
+
+<!-- ============ HEADER ============ -->
+<header class="top-bar no-print">
+<div class="header-row">
+<h1>💉 <span data-i18n="app_title">حاسبة جرعات التخدير</span></h1>
+<button type="button" class="theme-btn" id="themeBtn" aria-label="Theme">🌓</button>
+<div class="lang-toggle" role="group" aria-label="Language">
+<button class="lang-btn active" data-lang="ar">ع</button>
+<button class="lang-btn" data-lang="en">EN</button>
+</div>
+</div>
+
+<nav class="tabs-wizard" role="tablist">
+<button class="tab active" data-page="patient" role="tab"><span class="step-num">1</span><span data-i18n="tab_patient">بيانات المريض</span></button>
+<button class="tab" data-page="clinical" role="tab"><span class="step-num">2</span><span data-i18n="tab_clinical">التقييم السريري</span></button>
+<button class="tab" data-page="drug" role="tab"><span class="step-num">3</span><span data-i18n="tab_drug">الدواء والجرعة</span></button>
+<button class="tab" data-page="result" role="tab"><span class="step-num">4</span><span data-i18n="tab_result">النتيجة</span></button>
+</nav>
+
+<nav class="tabs-util" role="tablist">
+<button class="tab-util" data-page="body" role="tab">⚖️ <span data-i18n="tab_body">المؤشرات الجسدية</span></button>
+<button class="tab-util" data-page="ponv" role="tab">🧠 <span data-i18n="tab_ponv">حاسبة PONV</span></button>
+<button class="tab-util" data-page="help" role="tab">❓ <span data-i18n="tab_help">المساعدة</span></button>
+</nav>
+</header>
+
+<main class="app">
+
+<!-- ============ PAGE 1: PATIENT ============ -->
+<section class="page active" id="page-patient" role="tabpanel">
+<div class="card">
+<h2>👤 <span data-i18n="patient_title">بيانات المريض</span></h2>
+
+<div class="field">
+<label for="weight" id="weightLabel"><span data-i18n="weight_label">الوزن (كغ)</span> <span style="color:#c0392b">*</span></label>
+<div class="stepper-wrap" role="group">
+<button type="button" class="stepper-btn" id="weightDown" aria-label="−">−</button>
+<input type="number" id="weight" min="1" max="300" step="0.1" inputmode="decimal" data-i18n-placeholder="weight_ph" placeholder="مثال: 70" aria-required="true">
+<button type="button" class="stepper-btn" id="weightUp" aria-label="+">+</button>
+</div>
+<span class="error-msg" id="weightError" data-i18n="weight_err">الرجاء إدخال وزن صحيح (1 – 300 كغ)</span>
+</div>
+
+<div class="row-2">
+<div class="field">
+<label for="height"><span data-i18n="height_label">الطول (سم)</span></label>
+<input type="number" id="height" min="50" max="250" step="0.5" inputmode="decimal" data-i18n-placeholder="height_ph" placeholder="مثال: 170">
+</div>
+<div class="field">
+<label for="age" id="ageLabel"><span data-i18n="age_label">العمر (سنة)</span> <span style="color:#c0392b">*</span></label>
+<div class="stepper-wrap" role="group">
+<button type="button" class="stepper-btn" id="ageDown" aria-label="−">−</button>
+<input type="number" id="age" min="0" max="120" step="1" inputmode="numeric" data-i18n-placeholder="age_ph" placeholder="مثال: 45" aria-required="true">
+<button type="button" class="stepper-btn" id="ageUp" aria-label="+">+</button>
+</div>
+<span class="error-msg" id="ageError" data-i18n="age_err">الرجاء إدخال عمر صحيح (0 – 120)</span>
+</div>
+</div>
+
+<div class="field">
+<label for="sex"><span data-i18n="sex_label">الجنس</span></label>
+<select id="sex">
+<option value="male" data-i18n="sex_male">ذكر</option>
+<option value="female" data-i18n="sex_female">أنثى</option>
+</select>
+</div>
+</div>
+</section>
+
+<!-- ============ PAGE 2: CLINICAL ============ -->
+<section class="page" id="page-clinical" role="tabpanel">
+<div class="card">
+<h2>🩺 <span data-i18n="clinical_title">التقييم السريري قبل التخدير</span></h2>
+
+<div class="section-label"><span data-i18n="sec_physical">التصنيف الفيزيائي</span></div>
+<div class="field">
+<label for="asa"><span data-i18n="asa_label">ASA Physical Status</span></label>
+<select id="asa">
+<option value="asa1" data-i18n="asa1">ASA I — مريض سليم</option>
+<option value="asa2" data-i18n="asa2">ASA II — مرض جهازي خفيف</option>
+<option value="asa3" data-i18n="asa3">ASA III — مرض جهازي شديد</option>
+<option value="asa4" data-i18n="asa4">ASA IV — تهديد دائم للحياة</option>
+<option value="asa5" data-i18n="asa5">ASA V — مريض محتضر</option>
+</select>
+<span class="hint" id="asaHint"></span>
+</div>
+
+<div class="field">
+<label for="smoking"><span data-i18n="smoking_label">حالة التدخين</span></label>
+<select id="smoking">
+<option value="nonsmoker" data-i18n="smoking_nonsmoker">غير مدخن</option>
+<option value="smoker" data-i18n="smoking_smoker">مدخن حالي</option>
+<option value="exsmoker" data-i18n="smoking_exsmoker">مدخن سابق (أقل من 6 أشهر)</option>
+</select>
+<span class="hint" id="smokingHint"></span>
+</div>
+
+<div class="section-label heart">🫀 <span data-i18n="sec_cardiac">الحالة القلبية</span></div>
+<div class="field">
+<label for="cardiac"><span data-i18n="cardiac_label">الحالة القلبية</span></label>
+<select id="cardiac">
+<option value="normal" data-i18n="cardiac_normal">سليمة</option>
+<option value="ihd" data-i18n="cardiac_ihd">داء قلبي إقفاري (IHD)</option>
+<option value="chf" data-i18n="cardiac_chf">قصور قلب (EF &lt; 40%)</option>
+<option value="htn" data-i18n="cardiac_htn">ارتفاع ضغط غير مضبوط</option>
+<option value="arrhythmia" data-i18n="cardiac_arrhythmia">اضطراب نظم القلب</option>
+<option value="phtn" data-i18n="cardiac_phtn">فرط ضغط رئوي (PH)</option>
+</select>
+<span class="hint" id="cardiacHint"></span>
+</div>
+
+<div class="section-label lung">🫁 <span data-i18n="sec_respiratory">الحالة التنفسية</span></div>
+<div class="field">
+<label for="respiratory"><span data-i18n="respiratory_label">الحالة التنفسية</span></label>
+<select id="respiratory">
+<option value="normal" data-i18n="resp_normal">سليمة</option>
+<option value="asthma" data-i18n="resp_asthma">ربو (Asthma)</option>
+<option value="copd" data-i18n="resp_copd">انسداد رئوي مزمن (COPD)</option>
+<option value="osa" data-i18n="resp_osa">انقطاع النفس النومي (OSA)</option>
+<option value="uri" data-i18n="resp_uri">عدوى تنفسية حادة (URI)</option>
+</select>
+<span class="hint" id="respiratoryHint"></span>
+</div>
+
+<div class="section-label"><span data-i18n="sec_organs">وظائف الأعضاء</span></div>
+<div class="row-2">
+<div class="field">
+<label for="renal"><span data-i18n="renal_label">وظائف الكلى</span></label>
+<select id="renal">
+<option value="normal" data-i18n="renal_normal">طبيعية</option>
+<option value="mild" data-i18n="renal_mild">قصور خفيف (GFR 60–89)</option>
+<option value="moderate" data-i18n="renal_moderate">قصور متوسط (GFR 30–59)</option>
+<option value="severe" data-i18n="renal_severe">قصور شديد (GFR &lt; 30)</option>
+</select>
+</div>
+<div class="field">
+<label for="hepatic"><span data-i18n="hepatic_label">وظائف الكبد</span></label>
+<select id="hepatic">
+<option value="normal" data-i18n="hepatic_normal">طبيعية (Child A)</option>
+<option value="mild" data-i18n="hepatic_mild">قصور خفيف (Child B)</option>
+<option value="moderate" data-i18n="hepatic_moderate">قصور متوسط (Child C)</option>
+<option value="severe" data-i18n="hepatic_severe">قصور شديد / فشل كبدي</option>
+</select>
+</div>
+</div>
+
+<div class="field">
+<label for="thyroid"><span data-i18n="thyroid_label">وظائف الغدة الدرقية</span></label>
+<select id="thyroid">
+<option value="normal" data-i18n="thyroid_normal">طبيعية (Euthyroid)</option>
+<option value="hypo" data-i18n="thyroid_hypo">قصور الغدة الدرقية</option>
+<option value="hyper" data-i18n="thyroid_hyper">فرط نشاط الغدة الدرقية</option>
+</select>
+<span class="hint" id="thyroidHint"></span>
+</div>
+</div>
+</section>
+
+<!-- ============ PAGE 3: DRUG ============ -->
+<section class="page" id="page-drug" role="tabpanel">
+<div class="card">
+<h2>💊 <span data-i18n="drug_title">اختيار الدواء والجرعة</span></h2>
+
+<div class="field">
+<label for="anType"><span data-i18n="type_label">نوع التخدير / المجال</span></label>
+<select id="anType"></select>
+<span class="hint" id="anTypeHint"></span>
+</div>
+
+<div class="field">
+<label for="drug"><span data-i18n="drug_label">الدواء</span></label>
+<select id="drug">
+<option value="propofol" data-i18n="d_propofol">بروبوفول (Propofol)</option>
+<option value="ketamine" data-i18n="d_ketamine">كيتامين (Ketamine)</option>
+<option value="midazolam" data-i18n="d_midazolam">ميدازولام (Midazolam)</option>
+<option value="fentanyl" data-i18n="d_fentanyl">فنتانيل (Fentanyl)</option>
+<option value="ephedrine" data-i18n="d_ephedrine">إيفيدرين (Ephedrine)</option>
+<option value="atracurium" data-i18n="d_atracurium">أتراكوريوم (Atracurium)</option>
+<option value="cisatracurium" data-i18n="d_cisatracurium">سيسأتراكوريوم (Nimbex)</option>
+<option value="rocuronium" data-i18n="d_rocuronium">أزميرون / روكورونيوم (Esmeron)</option>
+<option value="sevoflurane" data-i18n="d_sevoflurane">سيفوفلورين (Sevoflurane)</option>
+<option value="isoflurane" data-i18n="d_isoflurane">إيزوفلورين (Isoflurane)</option>
+</select>
+</div>
+
+<div class="field">
+<label for="doseOption"><span data-i18n="dose_label">نوع الجرعة</span></label>
+<select id="doseOption"></select>
+<span class="dose-range" id="doseRangeText"></span>
+</div>
+
+<div class="field" id="weightBasisField">
+<label for="weightBasis"><span data-i18n="basis_label">أساس حساب الجرعة (الوزن المرجعي)</span></label>
+<select id="weightBasis">
+<option value="actual" data-i18n="basis_actual">الوزن الفعلي (ABW)</option>
+<option value="ideal" data-i18n="basis_ideal">الوزن المثالي (IBW)</option>
+<option value="adjusted" data-i18n="basis_adjusted">الوزن المعدل (AdjBW)</option>
+<option value="lean" data-i18n="basis_lean">الوزن الخالي من الدهون (LBW)</option>
+</select>
+<span class="hint" id="basisHint"></span>
+<span class="clinical-note" id="clinicalNote"></span>
+</div>
+</div>
+</section>
+
+<!-- ============ PAGE 4: RESULT ============ -->
+<section class="page" id="page-result" role="tabpanel">
+<div class="card">
+<h2>📊 <span data-i18n="result_title">النتيجة</span></h2>
+
+<div id="resultEmpty" class="alert alert-info"><span data-i18n="result_empty">لم يتم الحساب بعد. انتقل إلى صفحة الدواء واضغط على "حساب الجرعة".</span></div>
+
+<div id="resultContent" class="hidden">
+<div class="result-box">
+<div class="result-value" id="resultValue">—</div>
+<div class="result-unit" id="resultUnit">mg</div>
+<div class="result-note" id="resultNote"></div>
+<div class="result-weight" id="resultWeight"></div>
+<div class="result-factors hidden" id="resultFactors"></div>
+</div>
+<div id="resultAlerts"></div>
+<button class="btn-print" id="printBtn" type="button">🖨️ <span data-i18n="print_btn">طباعة التقرير (A4)</span></button>
+</div>
+</div>
+</section>
+
+<!-- ============ PAGE BODY METRICS ============ -->
+<section class="page" id="page-body" role="tabpanel">
+<div class="card">
+<h2>⚖️ <span data-i18n="body_title">المؤشرات الجسدية</span></h2>
+<div class="info-grid">
+<div class="info-item"><span class="lbl" data-i18n="bmi_lbl">BMI</span><span class="val" id="bmiVal">—</span><span class="sub" id="bmiCat">kg/m²</span></div>
+<div class="info-item"><span class="lbl" data-i18n="ibw_lbl">الوزن المثالي</span><span class="val" id="ibwVal">—</span><span class="sub">IBW (kg)</span></div>
+<div class="info-item"><span class="lbl" data-i18n="adjbw_lbl">الوزن المعدل</span><span class="val" id="abwVal">—</span><span class="sub">AdjBW (kg)</span></div>
+<div class="info-item"><span class="lbl" data-i18n="lbw_lbl">الوزن الخالي من الدهون</span><span class="val" id="lbwVal">—</span><span class="sub">LBW (kg)</span></div>
+</div>
+<div id="bodyAlerts"></div>
+<div class="clinical-note" style="margin-top:12px" data-i18n="body_note">هذه المؤشرات تُحسب تلقائياً من بيانات المريض في الصفحة الأولى.</div>
+</div>
+</section>
+
+<!-- ============ PAGE PONV ============ -->
+<section class="page" id="page-ponv" role="tabpanel">
+<div class="card">
+<h2>🧠 <span data-i18n="ponv_title">حاسبة خطر الغثيان والقيء (PONV)</span></h2>
+<p style="font-size:.8rem;color:#6a5a7a;margin:0 0 12px" data-i18n="ponv_subtitle">نظام Apfel Score — حدد عوامل الخطر:</p>
+
+<div class="checkbox-group">
+<label class="checkbox-item" id="ponvFemaleLabel">
+<input type="checkbox" id="ponvFemale"><span class="cb-label" data-i18n="ponv_female">👩 الجنس الأنثوي</span>
+</label>
+<label class="checkbox-item" id="ponvNonSmokerLabel">
+<input type="checkbox" id="ponvNonSmoker" checked><span class="cb-label" data-i18n="ponv_nonsmoker">🚭 غير مدخن</span>
+</label>
+<label class="checkbox-item" id="ponvHistoryLabel">
+<input type="checkbox" id="ponvHistory"><span class="cb-label" data-i18n="ponv_history">🤢 تاريخ من PONV أو دوار الحركة</span>
+</label>
+<label class="checkbox-item" id="ponvOpioidsLabel">
+<input type="checkbox" id="ponvOpioids"><span class="cb-label" data-i18n="ponv_opioids">💊 استخدام أفيونات بعد العملية</span>
+</label>
+</div>
+
+<button class="btn btn-ponv" id="ponvBtn" type="button">🧮 <span data-i18n="ponv_calc">حساب خطر PONV</span></button>
+
+<div id="ponvResult" class="ponv-result hidden">
+<div class="ponv-score" id="ponvScore">0</div>
+<div class="ponv-risk" id="ponvRiskLevel"></div>
+<div class="ponv-recommend" id="ponvRecommend"></div>
+</div>
+</div>
+</section>
+
+<!-- ============ PAGE HELP ============ -->
+<section class="page" id="page-help" role="tabpanel">
+<div class="card">
+<h2>❓ <span data-i18n="help_title">دليل المساعدة والتفاعلات الدوائية</span></h2>
+<div id="helpContent"></div>
+</div>
+</section>
+
+<div class="warning no-print">
+<strong>⚠️ <span data-i18n="warning_title">تنبيه طبي مهم:</span></strong> <span data-i18n="warning_text">هذا البرنامج أداة حسابية مساعدة فقط. الجرعات إرشادية عامة، ويجب على طبيب التخدير تحديد الجرعة النهائية وفقاً لحالة المريض.</span>
+</div>
+
+<div class="footer no-print">
+<span data-i18n="footer_line1">حاسبة جرعات التخدير — تعمل دون اتصال بالإنترنت</span><br>
+<span data-i18n="footer_line2">للاستخدام من قبل أطباء التخدير فقط</span>
+</div>
+
+</main>
+
+<!-- ============ WIZARD NAV ============ -->
+<nav class="wizard-nav no-print" id="wizardNav" role="navigation">
+<button id="prevBtn" type="button" data-i18n="btn_prev">→ السابق</button>
+<button id="nextBtn" type="button" class="primary" data-i18n="btn_next">التالي ←</button>
+</nav>
+
+<!-- ============ PRINT REPORT ============ -->
+<div class="print-report" id="printReport"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   I18N - Translations
+============================================================ */
+var I18N = {
+ar: {
+app_title: "حاسبة جرعات التخدير",
+tab_patient: "بيانات المريض", tab_clinical: "التقييم السريري", tab_drug: "الدواء والجرعة", tab_result: "النتيجة",
+tab_body: "المؤشرات الجسدية", tab_ponv: "حاسبة PONV", tab_help: "المساعدة",
+patient_title: "بيانات المريض",
+weight_label: "الوزن (كغ)", weight_ph: "مثال: 70", weight_err: "الرجاء إدخال وزن صحيح (1 – 300 كغ)",
+height_label: "الطول (سم)", height_ph: "مثال: 170",
+age_label: "العمر (سنة)", age_ph: "مثال: 45", age_err: "الرجاء إدخال عمر صحيح (0 – 120)",
+sex_label: "الجنس", sex_male: "ذكر", sex_female: "أنثى",
+clinical_title: "التقييم السريري قبل التخدير",
+sec_physical: "التصنيف الفيزيائي",
+asa_label: "ASA Physical Status",
+asa1: "ASA I — مريض سليم", asa2: "ASA II — مرض جهازي خفيف", asa3: "ASA III — مرض جهازي شديد",
+asa4: "ASA IV — تهديد دائم للحياة", asa5: "ASA V — مريض محتضر",
+smoking_label: "حالة التدخين", smoking_nonsmoker: "غير مدخن", smoking_smoker: "مدخن حالي", smoking_exsmoker: "مدخن سابق (< 6 أشهر)",
+sec_cardiac: "الحالة القلبية", cardiac_label: "الحالة القلبية",
+cardiac_normal: "سليمة", cardiac_ihd: "داء قلبي إقفاري (IHD)", cardiac_chf: "قصور قلب (EF < 40%)",
+cardiac_htn: "ارتفاع ضغط غير مضبوط", cardiac_arrhythmia: "اضطراب نظم القلب", cardiac_phtn: "فرط ضغط رئوي (PH)",
+sec_respiratory: "الحالة التنفسية", respiratory_label: "الحالة التنفسية",
+resp_normal: "سليمة", resp_asthma: "ربو (Asthma)", resp_copd: "انسداد رئوي مزمن (COPD)",
+resp_osa: "انقطاع النفس النومي (OSA)", resp_uri: "عدوى تنفسية حادة (URI)",
+sec_organs: "وظائف الأعضاء",
+renal_label: "وظائف الكلى", renal_normal: "طبيعية", renal_mild: "قصور خفيف (GFR 60–89)",
+renal_moderate: "قصور متوسط (GFR 30–59)", renal_severe: "قصور شديد (GFR < 30)",
+hepatic_label: "وظائف الكبد", hepatic_normal: "طبيعية (Child A)", hepatic_mild: "قصور خفيف (Child B)",
+hepatic_moderate: "قصور متوسط (Child C)", hepatic_severe: "قصور شديد / فشل كبدي",
+thyroid_label: "وظائف الغدة الدرقية", thyroid_normal: "طبيعية (Euthyroid)",
+thyroid_hypo: "قصور الغدة الدرقية", thyroid_hyper: "فرط نشاط الغدة الدرقية",
+drug_title: "اختيار الدواء والجرعة", type_label: "نوع التخدير / المجال",
+drug_label: "الدواء",
+d_propofol: "بروبوفول (Propofol)", d_ketamine: "كيتامين (Ketamine)", d_midazolam: "ميدازولام (Midazolam)",
+d_fentanyl: "فنتانيل (Fentanyl)", d_ephedrine: "إيفيدرين (Ephedrine)",
+d_atracurium: "أتراكوريوم (Atracurium)", d_cisatracurium: "سيسأتراكوريوم (Nimbex)", d_rocuronium: "أزميرون / روكورونيوم (Esmeron)",
+d_sevoflurane: "سيفوفلورين (Sevoflurane)", d_isoflurane: "إيزوفلورين (Isoflurane)",
+dose_label: "نوع الجرعة",
+basis_label: "أساس حساب الجرعة (الوزن المرجعي)",
+basis_actual: "الوزن الفعلي (ABW)", basis_ideal: "الوزن المثالي (IBW)", basis_adjusted: "الوزن المعدل (AdjBW)", basis_lean: "الوزن الخالي من الدهون (LBW)",
+result_title: "النتيجة", result_empty: "لم يتم الحساب بعد. انتقل إلى صفحة الدواء واضغط على \"حساب الجرعة\".",
+print_btn: "طباعة التقرير (A4)",
+body_title: "المؤشرات الجسدية", bmi_lbl: "BMI", ibw_lbl: "الوزن المثالي", adjbw_lbl: "الوزن المعدل", lbw_lbl: "الوزن الخالي من الدهون",
+body_note: "هذه المؤشرات تُحسب تلقائياً من بيانات المريض في الصفحة الأولى.",
+ponv_title: "حاسبة خطر الغثيان والقيء (PONV)", ponv_subtitle: "نظام Apfel Score — حدد عوامل الخطر:",
+ponv_female: "👩 الجنس الأنثوي", ponv_nonsmoker: "🚭 غير مدخن",
+ponv_history: "🤢 تاريخ من PONV أو دوار الحركة", ponv_opioids: "💊 استخدام أفيونات بعد العملية",
+ponv_calc: "حساب خطر PONV",
+help_title: "دليل المساعدة والتفاعلات الدوائية",
+warning_title: "تنبيه طبي مهم:", warning_text: "هذا البرنامج أداة حسابية مساعدة فقط. الجرعات إرشادية عامة، ويجب على طبيب التخدير تحديد الجرعة النهائية وفقاً لحالة المريض.",
+footer_line1: "حاسبة جرعات التخدير — تعمل دون اتصال بالإنترنت", footer_line2: "للاستخدام من قبل أطباء التخدير فقط",
+btn_prev: "→ السابق", btn_next: "التالي ←", btn_calc: "🧮 حساب الجرعة",
+range_lbl: "النطاق", weight_used: "الوزن المستخدم", fixed_dose: "جرعة ثابتة (لا تُحسب على الوزن)",
+applied_factors: "📊 تعديلات الجرعة المطبّقة", total_factor: "معامل التعديل الكلي",
+sig_doctor: "توقيع الطبيب:", sig_date: "التاريخ:",
+no_calc: "لم يتم الحساب", report_title: "تقرير جرعة التخدير",
+section_patient: "بيانات المريض", section_clinical: "التقييم السريري", section_drug: "الدواء والجرعة",
+section_result: "النتيجة", section_body: "المؤشرات الجسدية", section_ponv: "خطر PONV",
+section_notes: "الملاحظات السريرية",
+year_lbl: "سنة", kg_lbl: "كغ", cm_lbl: "سم",
+ponv_score_lbl: "النتيجة (Apfel)", ponv_risk_lbl: "مستوى الخطر",
+help_html: `<div class="help-section">
+<h3>1. التصنيف الفيزيائي ASA</h3>
+<table class="help-table">
+<tr><th>التصنيف</th><th>الوصف</th><th>تأثير الجرعة</th></tr>
+<tr><td><strong>ASA I</strong></td><td>مريض سليم</td><td>جرعات قياسية (×1.0)</td></tr>
+<tr><td><strong>ASA II</strong></td><td>مرض جهازي خفيف</td><td>تخفيض طفيف (×0.9)</td></tr>
+<tr><td><strong>ASA III</strong></td><td>مرض جهازي شديد</td><td>تخفيض 25% (×0.75)</td></tr>
+<tr><td><strong>ASA IV</strong></td><td>تهديد دائم للحياة</td><td>تخفيض 45% (×0.55)</td></tr>
+<tr><td><strong>ASA V</strong></td><td>مريض محتضر</td><td>تخفيض 65% (×0.35)</td></tr>
+</table>
+</div>
+<div class="help-section">
+<h3>2. الحالة القلبية</h3>
+<table class="help-table">
+<tr><th>الحالة</th><th>التأثير</th><th>الأدوية المتأثرة</th></tr>
+<tr><td><strong>IHD</strong> (داء إقفاري)</td><td>تجنّب تسرع القلب وارتفاع استهلاك O₂</td><td>❌ الكيتامين، الإيفيدرين &nbsp;|&nbsp; ✅ الفنتانيل</td></tr>
+<tr><td><strong>CHF</strong> (قصور قلب)</td><td>تخفيض كبير للجرعات، خطر هبوط ضغط</td><td>⚠️ البروبوفول (×0.5)، الميدازولام (×0.7)</td></tr>
+<tr><td><strong>HTN</strong> غير مضبوط</td><td>خطر ارتفاع ضغط حاد عند التحريض</td><td>❌ الكيتامين، الإيفيدرين</td></tr>
+<tr><td><strong>اضطراب نظم</strong></td><td>حذر مع محفزات القلب</td><td>⚠️ الإيفيدرين، الكيتامين</td></tr>
+<tr><td><strong>PH</strong> (فرط ضغط رئوي)</td><td>خطر تدهور حاد في المقاومة الرئوية</td><td>❌ الكيتامين، الإيفيدرين، N₂O</td></tr>
+</table>
+</div>
+<div class="help-section">
+<h3>3. الحالة التنفسية</h3>
+<table class="help-table">
+<tr><th>الحالة</th><th>التأثير</th><th>التوصية</th></tr>
+<tr><td><strong>ربو</strong></td><td>خطر تشنج قصبي</td><td>❌ الأتراكوريوم (يحرر الهيستامين) &nbsp;|&nbsp; ✅ الكيتامين والبروبوفول</td></tr>
+<tr><td><strong>COPD</strong></td><td>احتباس CO₂، حساسية للأفيونات</td><td>⚠️ خفّض الفنتانيل 30%، الميدازولام 20%</td></tr>
+<tr><td><strong>OSA</strong></td><td>انسداد مجرى هوائي، تثبيط تنفسي</td><td>⚠️ خفّض الفنتانيل 40%، الميدازولام 40%، البروبوفول 20%</td></tr>
+<tr><td><strong>URI</strong></td><td>زيادة الإفرازات، تشنج قصبي</td><td>فكّر بتأجيل الجراحة الاختيارية</td></tr>
+</table>
+</div>
+<div class="help-section">
+<h3>4. وظائف الكبد والكلى</h3>
+<table class="help-table">
+<tr><th>الدواء</th><th>قصور كبدي</th><th>قصور كلوي</th></tr>
+<tr><td>البروبوفول</td><td>⚠️ يطول التأثير — قلّل الصيانة</td><td>✅ لا تعديل</td></tr>
+<tr><td>الميدازولام</td><td>⚠️ يطول التأثير بشكل ملحوظ</td><td>✅ لا تعديل جوهري</td></tr>
+<tr><td>الفنتانيل</td><td>⚠️ قد يطول التأثير</td><td>✅ خيار مفضّل في الفشل الكلوي</td></tr>
+<tr><td>الروكورونيوم</td><td>⚠️ يطول التأثير حتى 1.5 مرة</td><td>⚠️ تباين في المدة</td></tr>
+<tr><td>الأتراكوريوم</td><td>✅ إزالة Hofmann مستقلة</td><td>✅ إزالة Hofmann مستقلة</td></tr>
+<tr><td>السيسأتراكوريوم</td><td>✅ إزالة مستقلة</td><td>✅ إزالة مستقلة</td></tr>
+<tr><td>الإيفيدرين</td><td>✅ لا تعديل</td><td>✅ لا تعديل</td></tr>
+</table>
+</div>
+<div class="help-section">
+<h3>5. وظائف الغدة الدرقية</h3>
+<table class="help-table">
+<tr><th>الدواء</th><th>قصور الغدة</th><th>فرط النشاط</th></tr>
+<tr><td>البروبوفول</td><td>⚠️ ×0.6</td><td>⚠️ ×1.5 (استقلاب أسرع)</td></tr>
+<tr><td>الكيتامين</td><td>✅ ×0.7 (مفيد — يدعم الضغط)</td><td>❌ تجنّب (خطر ارتفاع ضغط حاد)</td></tr>
+<tr><td>الميدازولام</td><td>⚠️ ×0.7</td><td>⚠️ ×1.3</td></tr>
+<tr><td>الفنتانيل</td><td>⚠️ ×0.7</td><td>⚠️ ×1.2</td></tr>
+<tr><td>الروكورونيوم</td><td>⚠️ ×0.8</td><td>⚠️ ×1.4 (بداية أقصر)</td></tr>
+<tr><td>الأتراكوريوم</td><td>✅ لا تعديل</td><td>⚠️ ×1.3</td></tr>
+<tr><td>الإيفيدرين</td><td>✅ مفيد لبطء القلب</td><td>❌ تجنّب (خطر ارتفاع ضغط حاد)</td></tr>
+</table>
+</div>
+<div class="help-section">
+<h3>6. التدخين وتأثيره</h3>
+<ul>
+<li><strong>المدخنون:</strong> قد يحتاجون جرعات أعلى من البروبوفول والفنتانيل (تحريض إنزيمي، تحمّل).</li>
+<li><strong>غير المدخنين:</strong> خطر PONV أعلى (عامل Apfel).</li>
+<li><strong>المدخن السابق (< 6 أشهر):</strong> يُعامل كغير مدخن لخطر PONV.</li>
+<li>التدخين يزيد إفرازات الشعب الهوائية ويُبطئ الشفاء بعد الجراحة.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>7. تفاعلات وملاحظات مهمة</h3>
+<ul>
+<li>🚫 <strong>الإيفيدرين + IHD/HTN/PH:</strong> يُمنع — استخدم فينيليفرين بدلاً منه.</li>
+<li>🚫 <strong>الكيتامين + IHD/HTN/PH:</strong> يُمنع — يسبب تسرع قلب وارتفاع ضغط.</li>
+<li>⚠️ <strong>الأتراكوريوم + ربو:</strong> يُحرّر الهيستامين — فضّل سيسأتراكوريوم.</li>
+<li>⚠️ <strong>الأفيونات + OSA/COPD:</strong> خفّض الجرعة 30-40% وراقب التنفس.</li>
+<li>⚠️ <strong>بروبوفول + سمنة مفرطة:</strong> استخدم LBW وليس ABW.</li>
+<li>✅ <strong>الفنتانيل + IHD:</strong> مفيد (يقلل تسرع القلب).</li>
+<li>✅ <strong>البروبوفول + ربو:</strong> يوسّع القصبات — مفيد.</li>
+<li>✅ <strong>الأتراكوريوم/سيسأتراكوريوم + فشل كلوي أو كبدي:</strong> آمنان (إزالة مستقلة).</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>8. مؤشرات الوزن المرجعي</h3>
+<table class="help-table">
+<tr><th>المؤشر</th><th>المعادلة</th><th>الاستخدام</th></tr>
+<tr><td><strong>ABW</strong> — الوزن الفعلي</td><td>الوزن المُقاس</td><td>المرخيات العضلية، الإيفيدرين</td></tr>
+<tr><td><strong>IBW</strong> — المثالي (Devine)</td><td>50 + 2.3×(كل بوصة فوق 152 سم) للذكور / 45.5 للإناث</td><td>الفنتانيل، الروكورونيوم في السمنة</td></tr>
+<tr><td><strong>AdjBW</strong> — المعدل</td><td>IBW + 0.4×(ABW − IBW)</td><td>البروبوفول في السمنة</td></tr>
+<tr><td><strong>LBW</strong> — الخالي من الدهون (Janmahasatian)</td><td>9270×ABW / (6680+216×BMI) للذكور / (8780+244×BMI) للإناث</td><td>البروبوفول والفنتانيل في السمنة المفرطة</td></tr>
+</table>
+<div class="help-section">
+<h3>9. الغازات المخدرة المتطايرة</h3>
+<ul>
+<li><strong>سيفوفلورين:</strong> التركيز يُعطى كنسبة حجمية عبر vaporizer مُعاير؛ الصيانة الجراحية عادةً 0.5–3%، وMAC ينخفض مع العمر.</li>
+<li><strong>إيزوفلورين:</strong> التحريض عادةً 1.5–3%، والصيانة 1–2.5% مع N₂O، وقد يلزم 0.5–1% إضافية مع الأكسجين وحده.</li>
+<li>لا تُطبّق معاملات ASA/القلب/التنفس/الغدة/التدخين العامة على الغازات كضربات حسابية؛ التعديل السريري يكون بالتركيز وعمق التخدير والاستجابة.</li>
+<li>يجب استخدام vaporizer مخصص، ومراقبة ECG وBP وSpO₂ وETCO₂، مع الاستعداد للتهوية والدعم الدوراني.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>10. أنواع التخدير والفئة العمرية</h3>
+<ul>
+<li>في صفحة الدواء اختر أولاً <strong>نوع التخدير / المجال</strong>؛ تظهر بعدها أدوية هذا النوع فقط، ويتغير لون البطاقة والحدود: 🟦 عام · 🟩 نصفي/ناحي · 🟨 عيون · 🟥 طوارئ.</li>
+<li>الحدود القصوى للمخدرات الموضعية (ليدوكايين، بوبيفاكايين، روبيفاكايين) تظهر في النصفي/الناحي وفي العيون، والمستحلب الدهني يظهر في النصفي/الناحي والطوارئ.</li>
+<li>الفئة العمرية تُحدَّد من العمر: أقل من 18 سنة تظهر خيارات الأطفال (تبدأ بـ «(طفل)»)، وغير ذلك خيارات البالغين. إن اخترتَ جرعة لفئة مختلفة عن عمر المريض يظهر تنبيه أحمر.</li>
+<li>الأدوية التي لا تتوفر لها جرعة أطفال في البرنامج (التخدير النخاعي وجرعات العيون وغيرها) تعرض تنبيهاً بمراجعة أخصائي التخدير.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>11. كيف تُعامَل المعاملات (ASA، القلب، التنفس، الغدة، التدخين)</h3>
+<table class="help-table">
+<tr><th>الفئة</th><th>المعالجة</th></tr>
+<tr><td>أدوية وريدية قابلة للمعايرة: بروبوفول، كيتامين، ميدازولام، فنتانيل، إيفيدرين، أتراكوريوم، سيسأتراكوريوم، روكورونيوم (بما فيها خيارات الأطفال)</td><td><strong>تخفيض مباشر</strong> للجرعة مع ملاحظة تعدّد العوامل المطبّقة ونسبة التخفيض الكلية (يُؤخذ أقوى تخفيض)</td></tr>
+<tr><td>جرعات الإنعاش والطوارئ</td><td>لا تخفيض تلقائي + ملاحظة + تحذير بحالة المريض</td></tr>
+<tr><td>الحدود القصوى للمخدرات الموضعية والمستحلب الدهني</td><td>لا تخفيض تلقائي + ملاحظة + تحذير</td></tr>
+<tr><td>حجوم حقن العيون والتخدير النخاعي</td><td>لا تخفيض تلقائي + ملاحظة + تحذير</td></tr>
+<tr><td>أدوية العكس وسكسينيل كولين</td><td>لا تخفيض تلقائي + ملاحظة + تحذير</td></tr>
+<tr><td>الغازات (سيفوفلورين، إيزوفلورين)</td><td>تحذير فقط؛ المعايرة بالتركيز وMAC</td></tr>
+</table>
+<ul>
+<li>سبب عدم التخفيض في الإنعاش والحدود القصوى والعكس: التخفيض قد يؤدي إلى جرعة غير فعّالة (مثلاً ASA 5 في توقف القلب).</li>
+<li>مثال: بروبوفول تحريض، 70 كغ، ASA 4 مع قصور قلب: النطاق 70–175 ملغ يصبح 35–87.5 ملغ.</li>
+<li>ملاحظة للمراجعة السريرية: النسخة الأصلية تطبّق تخفيض ASA أيضاً على المرخيات العضلية، ولا تصفه المراجع القياسية؛ تحتاج إلى قرار أخصائي.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>12. التسريب المستمر والوحدات</h3>
+<ul>
+<li>جرعات mg/kg وmcg/kg تُعرض كمقدار كلي (mg أو mcg) = الجرعة لكل كغ × الوزن المرجعي.</li>
+<li>التسريب (mcg/kg/min أو mg/kg/hr أو mcg/kg/hr): النتيجة هي <strong>المعدل الكلي</strong> (mcg/min أو mg/hr أو mcg/hr) = المعدل لكل كغ × الوزن، ويظهر تحتها المعدل لكل كغ بعد المعاملات.</li>
+<li>الجرعات الثابتة (mg، mL، g، mcg) تُعرض كما هي ولا تُضرب بالوزن.</li>
+<li>عند وجود حد أقصى مطلق (مثل 300 ملغ ليدوكايين بدون أدرينالين) يُقصّ الناتج عنده ويظهر تنبيه أحمر.</li>
+<li>الغازات تُعرض كنسبة حجمية (vol%) أو MAC وليست جرعة بالوزن.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>13. ملاحظات أمان للأدوية المضافة</h3>
+<ul>
+<li>🚫 <strong>سكسينيل كولين:</strong> ممنوع أو خطر في فرط البوتاسيوم، الحروق/السحق الحديث، الأمراض العصبية العضلية، وتاريخ الحرارة الخبيثة؛ بطء القلب عند الأطفال.</li>
+<li>⚠️ <strong>نيوستيغمين:</strong> يُعطى مع مضاد مسكاريني (أتروبين/غليكوبيرولات) بعد التأكد من بدء التعافي العضلي (TOF)؛ الحد الأقصى 5 ملغ.</li>
+<li>⚠️ <strong>سوغاماديكس:</strong> الجرعة حسب عمق الحصار (2 ملغ/كغ متوسط، 4 ملغ/كغ عميق، 16 ملغ/كغ عكس فوري بعد الروكورونيوم للبالغين).</li>
+<li>⚠️ <strong>المخدرات الموضعية:</strong> الأرقام حدود قصوى إجمالية لكل المواقع وليست جرعات موصى بها؛ بوبيفاكايين سمية قلبية شديدة، اسحب قبل الحقن ولا تحقن وريدياً.</li>
+<li>🚨 <strong>سمية المخدر الموضعي (LAST):</strong> أوقف الحقن واطلب المساعدة؛ مستحلب دهني 20% بلعة 1.5 مل/كغ ثم تسريب 0.25 مل/كغ/دقيقة حسب بروتوكول ASRA.</li>
+<li>⚠️ <strong>تخدير العيون:</strong> الأرقام حجوم حقن وليست جرعات؛ تحقق من إجمالي المخدر الموضعي. Retrobulbar: خطر تخدير جذع الدماغ وثقب المقلة والنزف ومنعكس العين-القلب؛ Peribulbar: ثقب المقلة وارتفاع الضغط داخل العين.</li>
+<li>⚠️ <strong>التخدير النخاعي:</strong> النطاق عام؛ الجرعة تتغير بالطول والعمر والحمل ونوع العملية. راقب هبوط الضغط وبطء القلب. الفنتانيل النخاعي: راقب التنفس لفترة كافية.</li>
+<li>🚨 <strong>أدرينالين:</strong> توقف القلب 1 ملغ IV/IO كل 3–5 دقائق (طفل 0.01 ملغ/كغ)؛ التحسس الشديد داخل العضل 0.3–0.5 ملغ بتركيز 1 ملغ/مل (طفل 0.01 ملغ/كغ، حد أقصى 0.5).</li>
+<li>🚨 <strong>أتروبين:</strong> بالغ 1 ملغ مع تكرار حتى 3 ملغ كحد كلي؛ طفل 0.02 ملغ/كغ بحد أقصى 0.5 ملغ للجرعة الواحدة. تحقق من تركيز الأمبول.</li>
+<li>🚨 <strong>أميودارون وأدينوزين:</strong> أميودارون 300 ملغ ثم 150 ملغ للبالغ؛ أدينوزين 6 ملغ ثم 12 ملغ بحقن سريع جداً وغسول ملحي.</li>
+<li>⚠️ <strong>دكستروز، لورازيبام، كالسيوم، مغنيسيوم، بيكربونات:</strong> أعد قياس السكر بعد الدكستروز؛ لورازيبام يكبت التنفس؛ كلوريد الكالسيوم يفضّل خطاً مركزياً؛ بيكربونات 4.2% للرضع بعد تهوية وضغطات كافية.</li>
+<li>🚨 <strong>دانترولين (حرارة خبيثة):</strong> أوقف الغازات وسكسينيل كولين وأعطِ أكسجين 100%؛ الجرعة الأولى 2.5 ملغ/كغ وتُكرر حسب الاستجابة.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>14. الواجهة والتثبيت</h3>
+<ul>
+<li><strong>الوضع الداكن:</strong> زر 🌓 في أعلى الصفحة يبدّل بين تلقائي (حسب النظام) ☀️ فاتح 🌙 داكن، ويحفظ الاختيار.</li>
+<li><strong>اللغة:</strong> زر ع / EN؛ الأدوية والتحذيرات والمساعدة تتبدل مع اللغة.</li>
+<li><strong>الحفظ:</strong> بيانات المريض والاختيارات تُحفظ تلقائياً في هذا الجهاز فقط.</li>
+<li><strong>الطباعة:</strong> تقرير A4 من صفحة النتيجة.</li>
+<li><strong>التثبيت (PWA):</strong> افتح التطبيق من رابط HTTPS ثم اختر «تثبيت» أو «إضافة إلى الشاشة الرئيسية». بعد أول تحميل يعمل دون إنترنت. عند تحديث الملفات أعد تحميل الصفحة مرتين ليأخذ المتصفح النسخة الجديدة.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>15. حدود البرنامج والمراجعة السريرية</h3>
+<ul>
+<li>الجرعات المضافة مأخوذة من مراجع منشورة (Miller's Anesthesia 9e، AHA ACLS/PALS، ASRA/NYSORA، AES، MHAUS، ملصقات الأدوية) <strong>لكنها غير معتمدة سريرياً</strong>؛ يجب أن يراجعها أخصائي تخدير أو صيدلاني سريري ويعتمدها وفق بروتوكول المستشفى قبل الاستخدام على المرضى.</li>
+<li>الأدوية الأصلية في الملف لا يُسجَّل لها مرجع داخل البرنامج.</li>
+<li>أداة مساعدة للقرار ولا تغني عن الحكم السريري؛ تحقق دائماً من ملصق الدواء وتركيزه والمراقبة اللازمة.</li>
+<li>غير متوفر: جرعات التخدير النخاعي للأطفال، وجرعات العيون للأطفال، وبعض الأدوية الشائعة الأخرى.</li>
+</ul>
+</div>
+</div>`
+},
+en: {
+app_title: "Anesthesia Dose Calculator",
+tab_patient: "Patient Data", tab_clinical: "Clinical Assessment", tab_drug: "Drug & Dose", tab_result: "Result",
+tab_body: "Body Metrics", tab_ponv: "PONV Calculator", tab_help: "Help",
+patient_title: "Patient Data",
+weight_label: "Weight (kg)", weight_ph: "e.g. 70", weight_err: "Please enter a valid weight (1 – 300 kg)",
+height_label: "Height (cm)", height_ph: "e.g. 170",
+age_label: "Age (years)", age_ph: "e.g. 45", age_err: "Please enter a valid age (0 – 120)",
+sex_label: "Sex", sex_male: "Male", sex_female: "Female",
+clinical_title: "Pre-anesthetic Clinical Assessment",
+sec_physical: "Physical Classification",
+asa_label: "ASA Physical Status",
+asa1: "ASA I — Healthy patient", asa2: "ASA II — Mild systemic disease", asa3: "ASA III — Severe systemic disease",
+asa4: "ASA IV — Constant threat to life", asa5: "ASA V — Moribund patient",
+smoking_label: "Smoking Status", smoking_nonsmoker: "Non-smoker", smoking_smoker: "Current smoker", smoking_exsmoker: "Ex-smoker (< 6 months)",
+sec_cardiac: "Cardiac Status", cardiac_label: "Cardiac Status",
+cardiac_normal: "Normal", cardiac_ihd: "Ischemic Heart Disease (IHD)", cardiac_chf: "Heart Failure (EF < 40%)",
+cardiac_htn: "Uncontrolled Hypertension", cardiac_arrhythmia: "Cardiac Arrhythmia", cardiac_phtn: "Pulmonary Hypertension (PH)",
+sec_respiratory: "Respiratory Status", respiratory_label: "Respiratory Status",
+resp_normal: "Normal", resp_asthma: "Asthma", resp_copd: "COPD",
+resp_osa: "Obstructive Sleep Apnea (OSA)", resp_uri: "Upper Respiratory Infection (URI)",
+sec_organs: "Organ Function",
+renal_label: "Renal Function", renal_normal: "Normal", renal_mild: "Mild impairment (GFR 60–89)",
+renal_moderate: "Moderate impairment (GFR 30–59)", renal_severe: "Severe impairment (GFR < 30)",
+hepatic_label: "Hepatic Function", hepatic_normal: "Normal (Child A)", hepatic_mild: "Mild impairment (Child B)",
+hepatic_moderate: "Moderate impairment (Child C)", hepatic_severe: "Severe impairment / Liver failure",
+thyroid_label: "Thyroid Function", thyroid_normal: "Normal (Euthyroid)",
+thyroid_hypo: "Hypothyroidism", thyroid_hyper: "Hyperthyroidism",
+drug_title: "Drug & Dose Selection", type_label: "Anesthesia type / field",
+drug_label: "Drug",
+d_propofol: "Propofol", d_ketamine: "Ketamine", d_midazolam: "Midazolam",
+d_fentanyl: "Fentanyl", d_ephedrine: "Ephedrine",
+d_atracurium: "Atracurium", d_cisatracurium: "Cisatracurium (Nimbex)", d_rocuronium: "Rocuronium (Esmeron)",
+d_sevoflurane: "Sevoflurane", d_isoflurane: "Isoflurane",
+dose_label: "Dose Type",
+basis_label: "Dosing Weight Basis",
+basis_actual: "Actual Body Weight (ABW)", basis_ideal: "Ideal Body Weight (IBW)", basis_adjusted: "Adjusted Body Weight (AdjBW)", basis_lean: "Lean Body Weight (LBW)",
+result_title: "Result", result_empty: "Not calculated yet. Go to Drug page and press \"Calculate Dose\".",
+print_btn: "Print Report (A4)",
+body_title: "Body Metrics", bmi_lbl: "BMI", ibw_lbl: "Ideal Weight", adjbw_lbl: "Adjusted Weight", lbw_lbl: "Lean Body Weight",
+body_note: "These metrics are computed automatically from patient data on the first page.",
+ponv_title: "PONV Risk Calculator", ponv_subtitle: "Apfel Score — Check risk factors:",
+ponv_female: "👩 Female sex", ponv_nonsmoker: "🚭 Non-smoker",
+ponv_history: "🤢 History of PONV or motion sickness", ponv_opioids: "💊 Postoperative opioid use",
+ponv_calc: "Calculate PONV Risk",
+help_title: "Help Guide & Drug Interactions",
+warning_title: "Important Medical Notice:", warning_text: "This software is a computational aid only. Doses are general guidance; the final dose must be determined by the anesthesiologist based on the patient's condition.",
+footer_line1: "Anesthesia Dose Calculator — Works offline", footer_line2: "For use by anesthesiologists only",
+btn_prev: "← Previous", btn_next: "Next →", btn_calc: "🧮 Calculate Dose",
+range_lbl: "Range", weight_used: "Weight used", fixed_dose: "Fixed dose (not weight-based)",
+applied_factors: "📊 Applied dose adjustments", total_factor: "Total adjustment factor",
+sig_doctor: "Doctor signature:", sig_date: "Date:",
+no_calc: "Not calculated", report_title: "Anesthesia Dose Report",
+section_patient: "Patient Data", section_clinical: "Clinical Assessment", section_drug: "Drug & Dose",
+section_result: "Result", section_body: "Body Metrics", section_ponv: "PONV Risk",
+section_notes: "Clinical Notes",
+year_lbl: "y", kg_lbl: "kg", cm_lbl: "cm",
+ponv_score_lbl: "Score (Apfel)", ponv_risk_lbl: "Risk Level",
+help_html: `<div class="help-section">
+<h3>1. ASA Physical Status</h3>
+<table class="help-table">
+<tr><th>Class</th><th>Description</th><th>Dose Effect</th></tr>
+<tr><td><strong>ASA I</strong></td><td>Healthy patient</td><td>Standard dose (×1.0)</td></tr>
+<tr><td><strong>ASA II</strong></td><td>Mild systemic disease</td><td>Minor reduction (×0.9)</td></tr>
+<tr><td><strong>ASA III</strong></td><td>Severe systemic disease</td><td>25% reduction (×0.75)</td></tr>
+<tr><td><strong>ASA IV</strong></td><td>Constant threat to life</td><td>45% reduction (×0.55)</td></tr>
+<tr><td><strong>ASA V</strong></td><td>Moribund patient</td><td>65% reduction (×0.35)</td></tr>
+</table>
+</div>
+<div class="help-section">
+<h3>2. Cardiac Status</h3>
+<table class="help-table">
+<tr><th>Condition</th><th>Impact</th><th>Affected Drugs</th></tr>
+<tr><td><strong>IHD</strong></td><td>Avoid tachycardia and ↑ O₂ demand</td><td>❌ Ketamine, Ephedrine | ✅ Fentanyl</td></tr>
+<tr><td><strong>CHF</strong></td><td>Significant dose reduction; hypotension risk</td><td>⚠️ Propofol (×0.5), Midazolam (×0.7)</td></tr>
+<tr><td><strong>Uncontrolled HTN</strong></td><td>Risk of acute hypertensive response</td><td>❌ Ketamine, Ephedrine</td></tr>
+<tr><td><strong>Arrhythmia</strong></td><td>Caution with cardiac stimulants</td><td>⚠️ Ephedrine, Ketamine</td></tr>
+<tr><td><strong>PH</strong></td><td>Risk of acute pulmonary deterioration</td><td>❌ Ketamine, Ephedrine, N₂O</td></tr>
+</table>
+</div>
+<div class="help-section">
+<h3>3. Respiratory Status</h3>
+<table class="help-table">
+<tr><th>Condition</th><th>Impact</th><th>Recommendation</th></tr>
+<tr><td><strong>Asthma</strong></td><td>Bronchospasm risk</td><td>❌ Atracurium (histamine) | ✅ Ketamine, Propofol</td></tr>
+<tr><td><strong>COPD</strong></td><td>CO₂ retention, opioid sensitivity</td><td>⚠️ Reduce Fentanyl 30%, Midazolam 20%</td></tr>
+<tr><td><strong>OSA</strong></td><td>Airway obstruction, respiratory depression</td><td>⚠️ Reduce Fentanyl 40%, Midazolam 40%, Propofol 20%</td></tr>
+<tr><td><strong>URI</strong></td><td>Secretion, bronchospasm</td><td>Consider postponing elective surgery</td></tr>
+</table>
+</div>
+<div class="help-section">
+<h3>4. Hepatic & Renal Function</h3>
+<table class="help-table">
+<tr><th>Drug</th><th>Hepatic Impairment</th><th>Renal Impairment</th></tr>
+<tr><td>Propofol</td><td>⚠️ Prolonged effect — reduce maintenance</td><td>✅ No adjustment</td></tr>
+<tr><td>Midazolam</td><td>⚠️ Markedly prolonged effect</td><td>✅ No major adjustment</td></tr>
+<tr><td>Fentanyl</td><td>⚠️ May prolong effect</td><td>✅ Preferred opioid in renal failure</td></tr>
+<tr><td>Rocuronium</td><td>⚠️ Effect up to 1.5× longer</td><td>⚠️ Variable duration</td></tr>
+<tr><td>Atracurium</td><td>✅ Hofmann elimination</td><td>✅ Hofmann elimination</td></tr>
+<tr><td>Cisatracurium</td><td>✅ Organ-independent</td><td>✅ Organ-independent</td></tr>
+<tr><td>Ephedrine</td><td>✅ No adjustment</td><td>✅ No adjustment</td></tr>
+</table>
+</div>
+<div class="help-section">
+<h3>5. Thyroid Function</h3>
+<table class="help-table">
+<tr><th>Drug</th><th>Hypothyroidism</th><th>Hyperthyroidism</th></tr>
+<tr><td>Propofol</td><td>⚠️ ×0.6</td><td>⚠️ ×1.5 (faster metabolism)</td></tr>
+<tr><td>Ketamine</td><td>✅ ×0.7 (useful — supports BP)</td><td>❌ Avoid (hypertensive crisis risk)</td></tr>
+<tr><td>Midazolam</td><td>⚠️ ×0.7</td><td>⚠️ ×1.3</td></tr>
+<tr><td>Fentanyl</td><td>⚠️ ×0.7</td><td>⚠️ ×1.2</td></tr>
+<tr><td>Rocuronium</td><td>⚠️ ×0.8</td><td>⚠️ ×1.4 (shorter onset)</td></tr>
+<tr><td>Atracurium</td><td>✅ No adjustment</td><td>⚠️ ×1.3</td></tr>
+<tr><td>Ephedrine</td><td>✅ Useful for bradycardia</td><td>❌ Avoid (hypertensive crisis risk)</td></tr>
+</table>
+</div>
+<div class="help-section">
+<h3>6. Smoking Impact</h3>
+<ul>
+<li><strong>Smokers:</strong> May require higher doses of propofol and fentanyl (enzyme induction, tolerance).</li>
+<li><strong>Non-smokers:</strong> Higher PONV risk (Apfel factor).</li>
+<li><strong>Ex-smokers (< 6 months):</strong> Counted as non-smoker for PONV risk.</li>
+<li>Smoking increases airway secretions and delays postoperative recovery.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>7. Key Interactions & Notes</h3>
+<ul>
+<li>🚫 <strong>Ephedrine + IHD/HTN/PH:</strong> Contraindicated — use phenylephrine instead.</li>
+<li>🚫 <strong>Ketamine + IHD/HTN/PH:</strong> Avoid — causes tachycardia and hypertension.</li>
+<li>⚠️ <strong>Atracurium + Asthma:</strong> Releases histamine — prefer cisatracurium.</li>
+<li>⚠️ <strong>Opioids + OSA/COPD:</strong> Reduce dose 30-40% and monitor respiration.</li>
+<li>⚠️ <strong>Propofol + Morbid Obesity:</strong> Use LBW, not ABW.</li>
+<li>✅ <strong>Fentanyl + IHD:</strong> Beneficial (reduces tachycardia).</li>
+<li>✅ <strong>Propofol + Asthma:</strong> Bronchodilator — beneficial.</li>
+<li>✅ <strong>Atracurium/Cisatracurium + renal/hepatic failure:</strong> Safe (organ-independent elimination).</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>8. Dosing Weight Metrics</h3>
+<table class="help-table">
+<tr><th>Metric</th><th>Formula</th><th>Use</th></tr>
+<tr><td><strong>ABW</strong> — Actual BW</td><td>Measured weight</td><td>Muscle relaxants, ephedrine</td></tr>
+<tr><td><strong>IBW</strong> — Ideal (Devine)</td><td>50 + 2.3×(inches over 60) male / 45.5 female</td><td>Fentanyl, rocuronium in obesity</td></tr>
+<tr><td><strong>AdjBW</strong> — Adjusted</td><td>IBW + 0.4×(ABW − IBW)</td><td>Propofol in obesity</td></tr>
+<tr><td><strong>LBW</strong> — Lean (Janmahasatian)</td><td>9270×ABW / (6680+216×BMI) male / (8780+244×BMI) female</td><td>Propofol & fentanyl in morbid obesity</td></tr>
+</table>
+<div class="help-section">
+<h3>9. Volatile Inhalational Anesthetics</h3>
+<ul>
+<li><strong>Sevoflurane:</strong> delivered as a vaporizer-controlled volume concentration; surgical maintenance is usually 0.5–3%, and MAC decreases with age.</li>
+<li><strong>Isoflurane:</strong> induction is usually 1.5–3%; maintenance is 1–2.5% with N₂O, with an additional 0.5–1% potentially required with oxygen alone.</li>
+<li>Do not apply the generic ASA/cardiac/respiratory/thyroid/smoking multipliers as arithmetic dose adjustments to volatile agents; titrate concentration to clinical response and anesthetic depth.</li>
+<li>Use an agent-specific vaporizer, monitor ECG/BP/SpO₂/ETCO₂, and have airway, ventilation and circulatory support immediately available.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>10. Anesthesia Types and Age Group</h3>
+<ul>
+<li>On the Drug page, first choose the <strong>anesthesia type / field</strong>; only drugs for that type are listed, and the card/border colour changes: 🟦 General · 🟩 Spinal/Regional · 🟨 Ophthalmic · 🟥 Emergency.</li>
+<li>Local-anesthetic ceilings (lidocaine, bupivacaine, ropivacaine) appear under Regional and Ophthalmic; lipid emulsion appears under Regional and Emergency.</li>
+<li>The age group follows the patient's age: under 18 shows pediatric options (labelled "(Pediatric)"), otherwise adult options. A red alert appears if the selected dose belongs to a different age group.</li>
+<li>Drugs without a pediatric dose in the app (pediatric spinal, pediatric ophthalmic, etc.) show an alert to consult an anesthesiologist.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>11. How Factors Are Handled (ASA, Cardiac, Respiratory, Thyroid, Smoking)</h3>
+<table class="help-table">
+<tr><th>Group</th><th>Handling</th></tr>
+<tr><td>Titratable IV drugs: propofol, ketamine, midazolam, fentanyl, ephedrine, atracurium, cisatracurium, rocuronium (including pediatric options)</td><td><strong>Direct reduction</strong> with a note listing the applied factors and the total change (the strongest reduction is used)</td></tr>
+<tr><td>Resuscitation / emergency doses</td><td>No automatic reduction + note + patient-status warning</td></tr>
+<tr><td>Local-anesthetic ceilings and lipid emulsion</td><td>No automatic reduction + note + warning</td></tr>
+<tr><td>Ophthalmic injection volumes and spinal doses</td><td>No automatic reduction + note + warning</td></tr>
+<tr><td>Reversal agents and succinylcholine</td><td>No automatic reduction + note + warning</td></tr>
+<tr><td>Volatile agents (sevoflurane, isoflurane)</td><td>Warning only; titrate by concentration and MAC</td></tr>
+</table>
+<ul>
+<li>Why no reduction for resuscitation, ceilings and reversal: reducing could give an ineffective dose (e.g. ASA 5 in cardiac arrest).</li>
+<li>Example: propofol induction, 70 kg, ASA 4 with heart failure: the 70–175 mg range becomes 35–87.5 mg.</li>
+<li>Point for clinical review: the original file also applies ASA reduction to neuromuscular blockers, which standard references do not describe; a specialist decision is needed.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>12. Continuous Infusions and Units</h3>
+<ul>
+<li>mg/kg and mcg/kg doses are shown as a total amount (mg or mcg) = dose per kg × reference weight.</li>
+<li>Infusions (mcg/kg/min, mg/kg/hr, mcg/kg/hr): the result is the <strong>total rate</strong> (mcg/min, mg/hr or mcg/hr) = per-kg rate × weight; the per-kg rate after factors is shown beneath it.</li>
+<li>Fixed doses (mg, mL, g, mcg) are shown as they are and are not multiplied by weight.</li>
+<li>When an absolute maximum exists (e.g. 300 mg plain lidocaine) the result is capped at it and a red alert appears.</li>
+<li>Volatile agents are shown as volume % or MAC, not a weight-based dose.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>13. Safety Notes for the Added Drugs</h3>
+<ul>
+<li>🚫 <strong>Succinylcholine:</strong> contraindicated or risky in hyperkalemia, recent burns/crush, neuromuscular disease and malignant hyperthermia history; bradycardia in children.</li>
+<li>⚠️ <strong>Neostigmine:</strong> give with an antimuscarinic (atropine/glycopyrrolate) after confirming spontaneous recovery (TOF); maximum 5 mg.</li>
+<li>⚠️ <strong>Sugammadex:</strong> dose depends on block depth (2 mg/kg moderate, 4 mg/kg deep, 16 mg/kg immediate reversal after rocuronium in adults).</li>
+<li>⚠️ <strong>Local anesthetics:</strong> the figures are total maximums across all sites, not recommended doses; bupivacaine is severely cardiotoxic — aspirate and never inject IV.</li>
+<li>🚨 <strong>Local anesthetic systemic toxicity (LAST):</strong> stop injecting and call for help; 20% lipid emulsion 1.5 mL/kg bolus then 0.25 mL/kg/min infusion per the ASRA protocol.</li>
+<li>⚠️ <strong>Ophthalmic anesthesia:</strong> the figures are injection volumes, not doses; check the total local anesthetic. Retrobulbar: risk of brainstem anesthesia, globe perforation, hemorrhage and oculocardiac reflex; peribulbar: globe perforation and raised intraocular pressure.</li>
+<li>⚠️ <strong>Spinal:</strong> the range is general; dose varies with height, age, pregnancy and procedure. Monitor for hypotension and bradycardia. Intrathecal fentanyl: monitor breathing for an adequate period.</li>
+<li>🚨 <strong>Epinephrine:</strong> cardiac arrest 1 mg IV/IO every 3–5 min (child 0.01 mg/kg); anaphylaxis IM 0.3–0.5 mg at 1 mg/mL (child 0.01 mg/kg, max 0.5).</li>
+<li>🚨 <strong>Atropine:</strong> adult 1 mg, repeated up to a 3 mg total; child 0.02 mg/kg with a 0.5 mg single-dose maximum. Verify the ampoule concentration.</li>
+<li>🚨 <strong>Amiodarone and adenosine:</strong> amiodarone 300 mg then 150 mg (adult); adenosine 6 mg then 12 mg by very rapid push with a saline flush.</li>
+<li>⚠️ <strong>Dextrose, lorazepam, calcium, magnesium, bicarbonate:</strong> recheck glucose after dextrose; lorazepam depresses breathing; calcium chloride preferably via a central line; 4.2% bicarbonate for infants after adequate ventilation/compressions.</li>
+<li>🚨 <strong>Dantrolene (malignant hyperthermia):</strong> stop volatiles and succinylcholine, give 100% oxygen; initial dose 2.5 mg/kg, repeated per response.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>14. Interface and Installation</h3>
+<ul>
+<li><strong>Dark mode:</strong> the 🌓 button at the top cycles automatic (system) / ☀️ light / 🌙 dark and remembers the choice.</li>
+<li><strong>Language:</strong> the ع / EN button; drugs, warnings and this help switch with it.</li>
+<li><strong>Saving:</strong> patient data and selections are saved automatically on this device only.</li>
+<li><strong>Printing:</strong> an A4 report from the Result page.</li>
+<li><strong>Install (PWA):</strong> open the app from an HTTPS link, then choose "Install" or "Add to Home Screen". After the first load it works offline. After updating the files, reload the page twice so the browser picks up the new version.</li>
+</ul>
+</div>
+<div class="help-section">
+<h3>15. App Limits and Clinical Review</h3>
+<ul>
+<li>The added doses come from published references (Miller's Anesthesia 9e, AHA ACLS/PALS, ASRA/NYSORA, AES, MHAUS, drug labels) <strong>but are not clinically approved</strong>; an anesthesiologist or clinical pharmacist must review and approve them per hospital protocol before patient use.</li>
+<li>The original drugs in the file carry no reference inside the app.</li>
+<li>A decision-support aid only; it does not replace clinical judgment. Always verify the drug label, concentration and required monitoring.</li>
+<li>Not available: pediatric spinal doses, pediatric ophthalmic doses and some other common drugs.</li>
+</ul>
+</div>
+</div>`
+}
+};
+
+/* ============================================================
+   Drug Database
+============================================================ */
+var DRUGS = {
+propofol: {
+name_ar: "بروبوفول (Propofol)", name_en: "Propofol",
+hint_ar: "في السمنة (BMI ≥ 30) يُفضّل استخدام LBW أو IBW أو AdjBW لجرعة التحريض.",
+hint_en: "In obesity (BMI ≥ 30) prefer LBW, IBW, or AdjBW for induction.",
+options: [
+{ id: "induction", ar: "تحريض التخدير — بالغ أصحاء (ASA 1-2)", en: "Induction — Healthy adults (ASA 1-2)", min: 1.0, max: 2.5, unit: "mg/kg" },
+{ id: "induction_highrisk", ar: "تحريض — مرضى ضعفاء (ASA 3-4)", en: "Induction — Frail patients (ASA 3-4)", min: 0.5, max: 1.5, unit: "mg/kg" },
+{ id: "maintenance_bolus", ar: "جرعة صيانة إضافية (بلعة)", en: "Maintenance bolus", min: 0.5, max: 2.0, unit: "mg/kg" }
+]
+},
+ketamine: {
+name_ar: "كيتامين (Ketamine)", name_en: "Ketamine",
+hint_ar: "يُحسب على الوزن الفعلي. في السمنة المفرطة يُنصح بالوزن المعدل.",
+hint_en: "Calculated on actual body weight. In morbid obesity prefer adjusted body weight.",
+options: [
+{ id: "iv_induction", ar: "تحريض وريدي (IV)", en: "IV Induction", min: 1.0, max: 4.5, unit: "mg/kg" },
+{ id: "iv_induction_slow", ar: "تحريض وريدي — حقن بطيء", en: "IV Induction — slow push", min: 1.0, max: 2.0, unit: "mg/kg" },
+{ id: "im_induction", ar: "تحريض عضلي (IM)", en: "IM Induction", min: 6.5, max: 13.0, unit: "mg/kg" }
+]
+},
+midazolam: {
+name_ar: "ميدازولام (Midazolam)", name_en: "Midazolam",
+hint_ar: "يُحسب على الوزن الفعلي. في المسنين (>60) والمرضى الضعفاء تُخفّض الجرعة.",
+hint_en: "Calculated on actual body weight. Reduce in elderly (>60) and frail patients.",
+options: [
+{ id: "premedicated", ar: "تحريض — مريض مُهيأ (< 60 سنة)", en: "Induction — Premedicated (< 60 y)", min: 0.15, max: 0.20, unit: "mg/kg" },
+{ id: "unpremedicated", ar: "تحريض — غير مُهيأ (< 60 سنة)", en: "Induction — Unpremedicated (< 60 y)", min: 0.30, max: 0.35, unit: "mg/kg" },
+{ id: "elderly_premed", ar: "تحريض — مُهيأ (> 60 سنة)", en: "Induction — Elderly premedicated (> 60 y)", min: 0.05, max: 0.15, unit: "mg/kg" },
+{ id: "elderly_unpremed", ar: "تحريض — غير مُهيأ (> 60 سنة)", en: "Induction — Elderly unpremedicated (> 60 y)", min: 0.15, max: 0.30, unit: "mg/kg" },
+{ id: "sedation_bolus", ar: "بلعة تسكين", en: "Sedation bolus", min: 0.01, max: 0.05, unit: "mg/kg" },
+{ id: "sedation_infusion", ar: "تسريب تسكين مستمر", en: "Sedation continuous infusion", min: 0.03, max: 0.10, unit: "mg/kg/hr" }
+]
+},
+fentanyl: {
+name_ar: "فنتانيل (Fentanyl)", name_en: "Fentanyl",
+hint_ar: "في السمنة (BMI ≥ 30) يُفضّل الحساب على IBW أو LBW لتجنب الجرعة الزائدة.",
+hint_en: "In obesity (BMI ≥ 30) prefer IBW or LBW to avoid overdose.",
+options: [
+{ id: "induction", ar: "تحريض (مع مهدئ)", en: "Induction (with sedative)", min: 2.0, max: 5.0, unit: "mcg/kg" },
+{ id: "analgesic_bolus", ar: "بلعة تسكين جراحي", en: "Surgical analgesic bolus", min: 1.0, max: 2.0, unit: "mcg/kg" },
+{ id: "supplemental", ar: "جرعة إضافية", en: "Supplemental dose", min: 0.5, max: 1.0, unit: "mcg/kg" },
+{ id: "infusion", ar: "تسريب مستمر", en: "Continuous infusion", min: 0.7, max: 5.0, unit: "mcg/kg/hr" }
+]
+},
+ephedrine: {
+name_ar: "إيفيدرين (Ephedrine)", name_en: "Ephedrine",
+hint_ar: "بلعة ثابتة (5–10 mg) لعلاج هبوط الضغط. الجرعة القصوى 50 mg.",
+hint_en: "Fixed bolus (5–10 mg) for hypotension. Max 50 mg.",
+options: [
+{ id: "bolus", ar: "بلعة وريدية لعلاج هبوط الضغط", en: "IV bolus for hypotension", min: 5.0, max: 10.0, unit: "mg" },
+{ id: "repeat", ar: "جرعة مكررة (حسب الحاجة)", en: "Repeat dose (PRN)", min: 5.0, max: 10.0, unit: "mg" }
+]
+},
+atracurium: {
+name_ar: "أتراكوريوم (Atracurium)", name_en: "Atracurium",
+hint_ar: "لا يحتاج تعديلاً في القصور الكلوي أو الكبدي (إزالة Hofmann).",
+hint_en: "No adjustment in renal or hepatic impairment (Hofmann elimination).",
+options: [
+{ id: "initial", ar: "جرعة أولية / تحريض", en: "Initial / induction dose", min: 0.3, max: 0.6, unit: "mg/kg" },
+{ id: "maintenance", ar: "جرعة صيانة إضافية", en: "Maintenance dose", min: 0.1, max: 0.2, unit: "mg/kg" },
+{ id: "infusion", ar: "تسريب مستمر (ICU)", en: "Continuous infusion (ICU)", min: 4.5, max: 29.5, unit: "mcg/kg/min" }
+]
+},
+cisatracurium: {
+name_ar: "سيسأتراكوريوم (Nimbex)", name_en: "Cisatracurium (Nimbex)",
+hint_ar: "لا يحتاج تعديلاً في القصور الكلوي أو الكبدي. يُفضّل IBW في السمنة.",
+hint_en: "No adjustment in renal/hepatic impairment. Prefer IBW in obesity.",
+options: [
+{ id: "intubation", ar: "جرعة التنبيب (0.1-0.15 mg/kg)", en: "Intubation dose (0.1-0.15 mg/kg)", min: 0.10, max: 0.15, unit: "mg/kg" },
+{ id: "intubation_high", ar: "جرعة التنبيب — عالية (0.15-0.2)", en: "High intubation dose (0.15-0.2)", min: 0.15, max: 0.20, unit: "mg/kg" },
+{ id: "infusion", ar: "تسريب مستمر (ICU)", en: "Continuous infusion (ICU)", min: 1.0, max: 10.0, unit: "mcg/kg/min" }
+]
+},
+rocuronium: {
+name_ar: "أزميرون / روكورونيوم (Esmeron)", name_en: "Rocuronium (Esmeron)",
+hint_ar: "يُحسب على IBW في السمنة المفرطة. القصور الكبدي يطيل التأثير حتى 1.5 مرة.",
+hint_en: "Use IBW in morbid obesity. Hepatic impairment prolongs effect up to 1.5×.",
+options: [
+{ id: "intubation", ar: "جرعة التنبيب القياسية (0.6 mg/kg)", en: "Standard intubation dose (0.6 mg/kg)", min: 0.6, max: 0.6, unit: "mg/kg" },
+{ id: "rsi", ar: "التنبيب السريع RSI (0.9-1.2)", en: "RSI (0.9-1.2 mg/kg)", min: 0.9, max: 1.2, unit: "mg/kg" },
+{ id: "infusion", ar: "تسريب مستمر (ICU)", en: "Continuous infusion (ICU)", min: 10.0, max: 12.0, unit: "mcg/kg/min" }
+]
+},
+sevoflurane: {
+name_ar: "سيفوفلورين (Sevoflurane)", name_en: "Sevoflurane",
+mode: "inhaled", factorMode: "none",
+hint_ar: "عامل تخدير استنشاقي متطاير. يُعطى عبر vaporizer مُعاير للسيفوفلورين. الجرعة تُعبّر عن تركيز حجمي (%) وتُعاير حسب العمر والاستجابة، وليس mg/kg.",
+hint_en: "Volatile inhalational anesthetic. Use a vaporizer calibrated for sevoflurane. Dose is delivered concentration (%) and is titrated to age and response, not mg/kg.",
+options: [
+{ id: "induction_adult", ar: "تحريض استنشاقي — بالغ: حتى 5% عادةً", en: "Inhalational induction — adult: usually up to 5%", min: 0.5, max: 5.0, unit: "vol%" , mode: "concentration" },
+{ id: "induction_unpremedicated", ar: "تحريض استنشاقي — غير مُهيأ: حتى 8%", en: "Inhalational induction — unpremedicated: up to 8%", min: 0.5, max: 8.0, unit: "vol%", mode: "concentration" },
+{ id: "maintenance", ar: "صيانة التخدير الجراحي", en: "Surgical maintenance", min: 0.5, max: 3.0, unit: "vol%", mode: "concentration" },
+{ id: "mac_reference", ar: "مرجع MAC في الأكسجين حسب العمر", en: "Age-based MAC reference in oxygen", min: 0, max: 0, unit: "MAC", mode: "mac" }
+]
+},
+isoflurane: {
+name_ar: "إيزوفلورين (Isoflurane)", name_en: "Isoflurane",
+mode: "inhaled", factorMode: "none",
+hint_ar: "عامل تخدير استنشاقي متطاير. يُعطى فقط عبر vaporizer مُعاير للإيزوفلورين. التركيز يُعاير حسب العمر والحالة والاستجابة، وليس mg/kg.",
+hint_en: "Volatile inhalational anesthetic. Use only a vaporizer calibrated for isoflurane. Concentration is titrated to age, clinical status and response, not mg/kg.",
+options: [
+{ id: "induction", ar: "تحريض استنشاقي", en: "Inhalational induction", min: 1.5, max: 3.0, unit: "vol%", mode: "concentration" },
+{ id: "maintenance_n2o", ar: "صيانة مع N₂O", en: "Maintenance with N₂O", min: 1.0, max: 2.5, unit: "vol%", mode: "concentration" },
+{ id: "maintenance_oxygen", ar: "صيانة مع الأكسجين وحده", en: "Maintenance with oxygen alone", min: 1.5, max: 3.5, unit: "vol%", mode: "concentration" },
+{ id: "mac_reference", ar: "مرجع MAC في الأكسجين حسب العمر", en: "Age-based MAC reference in oxygen", min: 0, max: 0, unit: "MAC", mode: "mac" }
+]
+}
+};
+var DEFAULT_DRUG = "propofol";
+
+/* ============================================================
+   Factor Tables
+============================================================ */
+var ASA_FACTORS = { asa1: 1.00, asa2: 0.90, asa3: 0.75, asa4: 0.55, asa5: 0.35 };
+
+var CARDIAC_FACTORS = {
+propofol:{normal:1.00,ihd:0.75,chf:0.50,htn:0.85,arrhythmia:0.85,phtn:0.70},
+ketamine:{normal:1.00,ihd:0.55,chf:0.80,htn:0.45,arrhythmia:0.70,phtn:0.45},
+midazolam:{normal:1.00,ihd:0.90,chf:0.70,htn:1.00,arrhythmia:0.90,phtn:0.90},
+fentanyl:{normal:1.00,ihd:1.00,chf:0.80,htn:1.00,arrhythmia:0.90,phtn:0.90},
+ephedrine:{normal:1.00,ihd:0.40,chf:0.70,htn:0.40,arrhythmia:0.60,phtn:0.40},
+atracurium:{normal:1.00,ihd:1.00,chf:1.00,htn:1.00,arrhythmia:1.00,phtn:1.00},
+cisatracurium:{normal:1.00,ihd:1.00,chf:1.00,htn:1.00,arrhythmia:1.00,phtn:1.00},
+rocuronium:{normal:1.00,ihd:1.00,chf:1.00,htn:1.00,arrhythmia:1.00,phtn:1.00}
+};
+var CARDIAC_KEYS = { ihd:"cardiac_ihd", chf:"cardiac_chf", htn:"cardiac_htn", arrhythmia:"cardiac_arrhythmia", phtn:"cardiac_phtn" };
+
+var RESP_FACTORS = {
+propofol:{normal:1.00,asthma:1.00,copd:0.90,osa:0.80,uri:0.90},
+ketamine:{normal:1.00,asthma:0.90,copd:1.00,osa:0.90,uri:1.00},
+midazolam:{normal:1.00,asthma:1.00,copd:0.80,osa:0.60,uri:0.90},
+fentanyl:{normal:1.00,asthma:1.00,copd:0.70,osa:0.60,uri:0.90},
+ephedrine:{normal:1.00,asthma:1.00,copd:1.00,osa:1.00,uri:1.00},
+atracurium:{normal:1.00,asthma:0.90,copd:1.00,osa:1.00,uri:1.00},
+cisatracurium:{normal:1.00,asthma:1.00,copd:1.00,osa:1.00,uri:1.00},
+rocuronium:{normal:1.00,asthma:1.00,copd:1.00,osa:1.00,uri:1.00}
+};
+var RESP_KEYS = { asthma:"resp_asthma", copd:"resp_copd", osa:"resp_osa", uri:"resp_uri" };
+
+/* ============================================================
+   State
+============================================================ */
+var STORAGE_KEY = "anesthesia_calc_v8";
+var currentLang = "ar";
+var currentPage = "patient";
+var WIZARD = ["patient", "clinical", "drug", "result"];
+var lastResult = null;
+
+/* ============================================================
+   DOM refs
+============================================================ */
+function $(id){ return document.getElementById(id); }
+var weightEl=$("weight"), heightEl=$("height"), ageEl=$("age"), sexEl=$("sex");
+var asaEl=$("asa"), smokingEl=$("smoking"), cardiacEl=$("cardiac"), respEl=$("respiratory");
+var renalEl=$("renal"), hepaticEl=$("hepatic"), thyroidEl=$("thyroid");
+var asaHint=$("asaHint"), smokingHint=$("smokingHint"), cardiacHint=$("cardiacHint"), respHint=$("respiratoryHint"), thyroidHint=$("thyroidHint");
+var weightErr=$("weightError"), ageErr=$("ageError");
+var bmiVal=$("bmiVal"), bmiCat=$("bmiCat"), ibwVal=$("ibwVal"), abwVal=$("abwVal"), lbwVal=$("lbwVal"), bodyAlerts=$("bodyAlerts");
+var drugSelect=$("drug"), doseSelect=$("doseOption"), doseRangeText=$("doseRangeText"), weightBasisEl=$("weightBasis"), basisHint=$("basisHint"), clinicalNote=$("clinicalNote");
+var calcBtn=$("calcBtn"), printBtn=$("printBtn"), resultEmpty=$("resultEmpty"), resultContent=$("resultContent");
+var resultValue=$("resultValue"), resultUnit=$("resultUnit"), resultNote=$("resultNote"), resultWeight=$("resultWeight"), resultFactors=$("resultFactors"), resultAlerts=$("resultAlerts");
+var ponvFemale=$("ponvFemale"), ponvNonSmoker=$("ponvNonSmoker"), ponvHistory=$("ponvHistory"), ponvOpioids=$("ponvOpioids");
+var ponvBtn=$("ponvBtn"), ponvResult=$("ponvResult"), ponvScoreEl=$("ponvScore"), ponvRiskLevel=$("ponvRiskLevel"), ponvRecommend=$("ponvRecommend");
+var wizardNav=$("wizardNav"), prevBtn=$("prevBtn"), nextBtn=$("nextBtn");
+var helpContent=$("helpContent"), printReport=$("printReport");
+
+/* ===== v9: anesthesia types, new drugs, pediatric options ===== */
+var anTypeEl=$("anType");
+var TYPES={general:{ar:"التخدير العام",en:"General anesthesia",e:"🟦"},regional:{ar:"التخدير النصفي / الناحي",en:"Spinal / Regional",e:"🟩"},eye:{ar:"تخدير عمليات العيون",en:"Ophthalmic anesthesia",e:"🟨"},emergency:{ar:"أدوية الطوارئ",en:"Emergency drugs",e:"🟥"}};
+var RATE_UNITS=["mcg/kg/min","mg/kg/hr","mcg/kg/hr"];
+var FIXED_UNITS=["mg","mL","g","mcg"];
+var THEME_KEY=STORAGE_KEY+"_theme", themeMode="system";
+try{ themeMode=localStorage.getItem(THEME_KEY)||"system"; }catch(e){}
+function applyTheme(m){ var dk=m==="dark"||(m==="system"&&window.matchMedia&&matchMedia("(prefers-color-scheme: dark)").matches);
+document.documentElement.setAttribute("data-theme",dk?"dark":"light"); $("themeBtn").textContent=m==="dark"?"🌙":(m==="light"?"☀️":"🌓");
+var mt=document.querySelector('meta[name=theme-color]'); if(mt) mt.content=dk?"#162023":"#0d6e6e"; }
+function O(id,ar,en,min,max,unit,grp,cap){ return {id:id,ar:ar,en:en,min:min,max:max,unit:unit,grp:grp||null,cap:cap||null}; }
+function addDrug(k,types,nar,nen,ref,war,wen,opts){ DRUGS[k]={name_ar:nar,name_en:nen,types:types,custom:true,ref:ref,warn_ar:war,warn_en:wen,hint_ar:"المرجع: "+ref,hint_en:"Reference: "+ref,options:opts}; }
+function laOpts(p,a,ca,e,ce){ return [O(p+"_p","الحد الأقصى الكلي — بدون أدرينالين","Total maximum — plain",a,a,"mg/kg",null,ca),O(p+"_e","الحد الأقصى الكلي — مع أدرينالين","Total maximum — with epinephrine",e,e,"mg/kg",null,ce)]; }
+Object.keys(DRUGS).forEach(function(k){ if(!DRUGS[k].types) DRUGS[k].types=["general"]; });
+function addPeds(k,list){ var d=DRUGS[k]; d.options.forEach(function(o){ o.grp=o.grp||"a"; }); list.forEach(function(x){ d.options.push(x); }); }
+addPeds("propofol",[O("peds_induction","(طفل) تحريض — Cote & Lerman","(Pediatric) Induction",2.5,3.5,"mg/kg","p")]);
+addPeds("ketamine",[O("peds_iv","(طفل) وريدي","(Pediatric) IV",1,2,"mg/kg","p"),O("peds_im","(طفل) عضلي","(Pediatric) IM",4,6,"mg/kg","p")]);
+addPeds("midazolam",[O("peds_iv","(طفل) وريدي","(Pediatric) IV",0.05,0.1,"mg/kg","p"),O("peds_oral","(طفل) فموي قبل التخدير — حد أقصى 20 ملغ","(Pediatric) Oral premedication — max 20 mg",0.25,0.5,"mg/kg","p",20)]);
+addPeds("fentanyl",[O("peds_iv","(طفل) وريدي","(Pediatric) IV",1,2,"mcg/kg","p")]);
+addPeds("rocuronium",[O("peds_intub","(طفل) تنبيب","(Pediatric) Intubation",0.6,1.2,"mg/kg","p")]);
+addPeds("atracurium",[O("peds_intub","(طفل) تنبيب","(Pediatric) Intubation",0.5,0.5,"mg/kg","p")]);
+addPeds("cisatracurium",[O("peds_intub","(طفل) تنبيب","(Pediatric) Intubation",0.1,0.15,"mg/kg","p")]);
+addDrug("succinylcholine",["general"],"سكسينيل كولين (Succinylcholine)","Succinylcholine","Miller's Anesthesia 9e; Cote & Lerman",["ممنوع/خطر: فرط بوتاسيوم، حروق أو سحق حديث، أمراض عصبية عضلية، تاريخ الحرارة الخبيثة","بطء القلب عند الأطفال — جهّز الأتروبين"],["Contraindicated/risk: hyperkalemia, recent burns/crush, neuromuscular disease, malignant hyperthermia history","Bradycardia in children — have atropine ready"],[O("sux_a","تنبيب سريع التسلسل — بالغ","RSI — adult",1,1.5,"mg/kg","a"),O("sux_p","(طفل) — الرضع حتى 2 ملغ/كغ","(Pediatric) — infants up to 2 mg/kg",1,2,"mg/kg","p")]);
+addDrug("neostigmine",["general"],"نيوستيغمين (Neostigmine)","Neostigmine","Miller's Anesthesia 9e",["أعطِه مع مضاد مسكاريني (أتروبين/غليكوبيرولات)","تأكد من بدء التعافي العضلي (TOF) قبل الإعطاء"],["Give with an antimuscarinic (atropine/glycopyrrolate)","Confirm spontaneous recovery (TOF) before giving"],[O("neo_a","عكس الحصار العضلي — بالغ","Reversal — adult",0.04,0.07,"mg/kg","a",5),O("neo_p","(طفل) عكس الحصار العضلي","(Pediatric) Reversal",0.03,0.07,"mg/kg","p",5)]);
+addDrug("sugammadex",["general"],"سوغاماديكس (Sugammadex)","Sugammadex","Bridion prescribing information",["الجرعة تعتمد على عمق الحصار (TOF/PTC)","16 ملغ/كغ للعكس الفوري بعد الروكورونيوم (بالغين)"],["Dose depends on block depth (TOF/PTC)","16 mg/kg for immediate reversal after rocuronium (adults)"],[O("sg_mod","حصار متوسط (T2)","Moderate block (T2)",2,2,"mg/kg"),O("sg_deep","حصار عميق (PTC 1–2)","Deep block (PTC 1–2)",4,4,"mg/kg"),O("sg_imm","عكس فوري — بالغ","Immediate reversal — adult",16,16,"mg/kg","a")]);
+addDrug("spinal_bup",["regional"],"بوبيفاكائين الثقيل 0.5% — نخاعي","Hyperbaric Bupivacaine 0.5% — Spinal","Miller's Anesthesia 9e; NYSORA",["الجرعة تتغير بالطول والعمر والحمل ونوع العملية — النطاق عام","راقب هبوط الضغط وبطء القلب؛ التخدير النخاعي للأطفال يتطلب أخصائي"],["Dose varies with height, age, pregnancy and procedure — general range","Monitor hypotension/bradycardia; pediatric spinal requires a specialist"],[O("sp_gen","نخاعي — جراحة عامة","Spinal — general surgery",7.5,15,"mg","a"),O("sp_cs","نخاعي — قيصرية","Spinal — cesarean",8,12,"mg","a")]);
+addDrug("spinal_fent",["regional"],"فنتانيل — مساعد نخاعي","Fentanyl — intrathecal adjunct","Miller's Anesthesia 9e",["كبت تنفسي مبكر ومتأخر — راقب مدة كافية"],["Early/late respiratory depression — extended monitoring"],[O("itf","مساعد مع المخدر الموضعي","Adjunct to local anesthetic",10,25,"mcg","a")]);
+addDrug("la_lido",["regional","eye"],"ليدوكايين (Lidocaine) — الحد الأقصى","Lidocaine — maximum dose","NYSORA / ASRA; drug label",["هذا حد أعلى إجمالي لكل المواقع وليس جرعة موصى بها","الأطفال: استخدم الجرعة الأدنى الفعالة"],["Total maximum across all sites — not a recommended dose","Children: use the lowest effective dose"],laOpts("lido",4.5,300,7,500));
+addDrug("la_bup",["regional","eye"],"بوبيفاكايين (Bupivacaine) — الحد الأقصى","Bupivacaine — maximum dose","NYSORA / ASRA; drug label",["سمية قلبية شديدة — ممنوع الحقن الوريدي، اسحب قبل الحقن","هذا حد أعلى إجمالي وليس جرعة موصى بها"],["Severe cardiotoxicity — never IV; aspirate before injecting","Total maximum — not a recommended dose"],laOpts("bup",2,175,3,225));
+addDrug("la_rop",["regional","eye"],"روبيفاكايين (Ropivacaine) — الحد الأقصى","Ropivacaine — maximum dose","NYSORA / ASRA; drug label",["هذا حد أعلى إجمالي وليس جرعة موصى بها"],["Total maximum — not a recommended dose"],[O("rop","الحد الأقصى الكلي","Total maximum",3,3,"mg/kg",null,200)]);
+addDrug("lipid",["regional","emergency"],"المستحلب الدهني 20% — سمية المخدر الموضعي","Lipid Emulsion 20% — LAST","ASRA LAST Checklist 2020",["أوقف المخدر الموضعي واطلب المساعدة","بعد الحقنة الأولى: تسريب 0.25 مل/كغ/دقيقة حسب بروتوكول ASRA"],["Stop local anesthetic and call for help","After bolus: infusion 0.25 mL/kg/min per ASRA protocol"],[O("lip","حقنة وريدية أولى (خلال دقيقة)","Initial IV bolus (over ~1 min)",1.5,1.5,"mL/kg")]);
+addDrug("eye_tenon",["eye"],"Sub-Tenon — حجم الحقن","Sub-Tenon — injection volume","NYSORA; Miller's Anesthesia 9e",["الحجم المحقون وليس الجرعة — تحقق من إجمالي المخدر الموضعي","اختر المخدر والتركيز حسب البروتوكول"],["Injected volume, not dose — check total local anesthetic","Choose agent/concentration per protocol"],[O("tenon","حجم الحقن","Injection volume",3,5,"mL","a")]);
+addDrug("eye_peri",["eye"],"Peribulbar — حجم الحقن","Peribulbar — injection volume","NYSORA; Miller's Anesthesia 9e",["الحجم المحقون وليس الجرعة — تحقق من إجمالي المخدر الموضعي","خطر ثقب المقلة وارتفاع الضغط داخل العين"],["Injected volume, not dose — check total local anesthetic","Risk of globe perforation and raised intraocular pressure"],[O("peri","حجم الحقن","Injection volume",5,10,"mL","a")]);
+addDrug("eye_retro",["eye"],"Retrobulbar — حجم الحقن","Retrobulbar — injection volume","NYSORA; Miller's Anesthesia 9e",["خطر تخدير جذع الدماغ، ثقب المقلة، نزف خلف المقلة، ومنعكس العين-القلب","الحجم المحقون وليس الجرعة — تحقق من إجمالي المخدر الموضعي"],["Risk of brainstem anesthesia, globe perforation, retrobulbar hemorrhage, oculocardiac reflex","Injected volume, not dose — check total local anesthetic"],[O("retro","حجم الحقن","Injection volume",3,5,"mL","a")]);
+addDrug("e_epi",["emergency"],"أدرينالين (Epinephrine)","Epinephrine (Adrenaline)","AHA ACLS/PALS; WAO Anaphylaxis Guidance",["توقف القلب: كرر كل 3–5 دقائق — التحسس: داخل العضل (الفخذ الوحشي) بتركيز 1 ملغ/مل"],["Cardiac arrest: repeat every 3–5 min — Anaphylaxis: IM (lateral thigh), 1 mg/mL"],[O("epi_arr_a","توقف القلب — بالغ (IV/IO)","Cardiac arrest — adult (IV/IO)",1,1,"mg","a"),O("epi_arr_p","(طفل) توقف القلب (IV/IO)","(Pediatric) Cardiac arrest (IV/IO)",0.01,0.01,"mg/kg","p",1),O("epi_ana_a","تحسس شديد — بالغ (IM)","Anaphylaxis — adult (IM)",0.3,0.5,"mg","a"),O("epi_ana_p","(طفل) تحسس شديد (IM)","(Pediatric) Anaphylaxis (IM)",0.01,0.01,"mg/kg","p",0.5)]);
+addDrug("e_atr",["emergency"],"أتروبين (Atropine)","Atropine","AHA ACLS/PALS",["بالغ: كرر كل 3–5 دقائق، الحد الأقصى الكلي 3 ملغ","تحقق من تركيز الأمبول"],["Adult: repeat every 3–5 min, total max 3 mg","Verify ampoule concentration"],[O("atr_a","بطء القلب — بالغ","Bradycardia — adult",1,1,"mg","a"),O("atr_p","(طفل) بطء القلب","(Pediatric) Bradycardia",0.02,0.02,"mg/kg","p",0.5)]);
+addDrug("e_amio",["emergency"],"أميودارون (Amiodarone)","Amiodarone","AHA ACLS/PALS",["بالغ: الجرعة الثانية 150 ملغ"],["Adult: second dose 150 mg"],[O("amio_a","رجفان/تسرع بطيني بلا نبض — بالغ","Pulseless VF/VT — adult",300,300,"mg","a"),O("amio_p","(طفل) رجفان/تسرع بطيني بلا نبض","(Pediatric) Pulseless VF/VT",5,5,"mg/kg","p",300)]);
+addDrug("e_aden",["emergency"],"أدينوزين (Adenosine)","Adenosine","AHA ACLS/PALS",["حقن وريدي سريع جداً متبوع بغسول ملحي","الجرعة الثانية: بالغ 12 ملغ — طفل 0.2 ملغ/كغ (حد أقصى 12)"],["Very rapid IV push followed by saline flush","Second dose: adult 12 mg — child 0.2 mg/kg (max 12)"],[O("aden_a","تسرع فوق بطيني — بالغ (الجرعة الأولى)","SVT — adult (first dose)",6,6,"mg","a"),O("aden_p","(طفل) الجرعة الأولى","(Pediatric) first dose",0.1,0.1,"mg/kg","p",6)]);
+addDrug("e_dex",["emergency"],"دكستروز (Dextrose)","Dextrose","AHA PALS; ADA Standards of Care",["أعد قياس سكر الدم بعد الإعطاء","طفل: D10 = 5–10 مل/كغ"],["Recheck blood glucose after giving","Child: D10 = 5–10 mL/kg"],[O("dex_a","هبوط السكر — بالغ","Hypoglycemia — adult",12.5,25,"g","a"),O("dex_p","(طفل) هبوط السكر","(Pediatric) Hypoglycemia",0.5,1,"g/kg","p",25)]);
+addDrug("e_lzp",["emergency"],"لورازيبام (Lorazepam)","Lorazepam","AES Status Epilepticus Guideline 2016",["كبت تنفسي — جهّز دعم المجرى الهوائي","يمكن تكرار الجرعة مرة واحدة"],["Respiratory depression — prepare airway support","May repeat once"],[O("lzp","تشنجات مستمرة","Status epilepticus",0.1,0.1,"mg/kg",null,4)]);
+addDrug("e_cacl",["emergency"],"كلوريد الكالسيوم 10%","Calcium Chloride 10%","AHA ACLS/PALS",["يفضّل خط مركزي — التسرب يسبب نخراً نسيجياً"],["Central line preferred — extravasation causes tissue necrosis"],[O("cacl_a","فرط بوتاسيوم/توقف القلب — بالغ","Hyperkalemia/arrest — adult",500,1000,"mg","a"),O("cacl_p","(طفل)","(Pediatric)",20,20,"mg/kg","p",1000)]);
+addDrug("e_mg",["emergency"],"كبريتات المغنيسيوم (MgSO4)","Magnesium Sulfate","AHA ACLS/PALS",["للـ torsades: يُعطى خلال 5–20 دقيقة (مع نبض)"],["Torsades: give over 5–20 min (with pulse)"],[O("mg_a","Torsades de pointes — بالغ","Torsades de pointes — adult",1,2,"g","a"),O("mg_p","(طفل)","(Pediatric)",25,50,"mg/kg","p",2000)]);
+addDrug("e_bic",["emergency"],"بيكربونات الصوديوم (NaHCO3)","Sodium Bicarbonate","AHA ACLS/PALS",["للرضع استخدم التركيز 4.2%","بعد تهوية وضغطات كافية؛ أعطِه ببطء"],["Use 4.2% concentration in infants","Only after adequate ventilation/compressions; give slowly"],[O("bic","حماض شديد/فرط بوتاسيوم","Severe acidosis/hyperkalemia",1,1,"mEq/kg")]);
+addDrug("e_dan",["emergency"],"دانترولين (Dantrolene) — الحرارة الخبيثة","Dantrolene — malignant hyperthermia","MHAUS Emergency Therapy",["أوقف المواد المحفزة (الغازات/السكسينيل كولين) وأعطِ O₂ 100%","كرر حتى 10 ملغ/كغ أو أكثر حسب الاستجابة"],["Stop triggering agents (volatiles/succinylcholine); 100% O₂","Repeat up to 10 mg/kg or more per response"],[O("dan","الجرعة الأولى","Initial dose",2.5,2.5,"mg/kg")]);
+function visibleOptions(d){ var a=getAge(); if(a===null) return d.options; var f=d.options.filter(function(o){ return !o.grp||((a<18)===(o.grp==="p")); }); return f.length?f:d.options; }
+function customAlertHTML(d,opt,age){ var ar=currentLang==="ar",a="",bits=[];
+if(["asa3","asa4","asa5"].indexOf(asaEl.value)>-1) bits.push("ASA "+asaEl.value.replace("asa",""));
+if(cardiacEl.value!=="normal") bits.push(T(CARDIAC_KEYS[cardiacEl.value])); if(respEl.value!=="normal") bits.push(T(RESP_KEYS[respEl.value]));
+a+='<div class="alert alert-info">ℹ️ '+(ar?"لم يُطبَّق تخفيض تلقائي على هذا الدواء (جرعة إنعاش/حد أقصى/حجم حقن/عكس) لأن التخفيض قد يؤدي إلى جرعة غير فعّالة.":"No automatic reduction applied (resuscitation/ceiling/injection-volume/reversal dose) because reducing could under-dose.")+'</div>';
+if(bits.length) a+='<div class="alert alert-warn"><strong>⚠️</strong> '+(ar?"حالة المريض: ":"Patient status: ")+esc(bits.join(ar?"، ":", "))+(ar?" — قيّم الجرعة سريرياً وعاير حسب الاستجابة.":" — assess the dose clinically and titrate to response.")+'</div>';
+if(age!==null&&opt.grp&&((age<18)!==(opt.grp==="p"))) a+='<div class="alert alert-danger"><strong>⚠️</strong> '+(ar?"هذه الجرعة لفئة عمرية مختلفة عن عمر المريض.":"This dose is for a different age group than the patient.")+'</div>';
+else if(age!==null&&age<18&&!d.options.some(function(o){return o.grp==="p";})) a+='<div class="alert alert-danger"><strong>⚠️</strong> '+(ar?"لا توجد جرعات أطفال لهذا الدواء هنا — راجع أخصائي التخدير.":"No pediatric dose listed for this drug — consult a specialist.")+'</div>';
+(d["warn_"+currentLang]||[]).forEach(function(w){ a+='<div class="alert alert-warn">⚠️ '+esc(w)+'</div>'; });
+return a+'<div class="alert alert-info">📚 '+(ar?"المرجع: ":"Reference: ")+esc(d.ref)+(ar?" — تحقق من البروتوكول المحلي.":" — verify against local protocol.")+'</div>'; }
+function buildHelpDrugTable(){ var ar=currentLang==="ar", h='<div class="help-section"><h3>'+(ar?"16. جدول الأدوية والجرعات حسب النوع":"16. Drugs and Doses by Type")+'</h3>';
+Object.keys(TYPES).forEach(function(t){ var rows="";
+Object.keys(DRUGS).forEach(function(k){ var d=DRUGS[k]; if(d.types.indexOf(t)<0) return;
+d.options.forEach(function(o,i){ var rg=o.mode==="mac"?(ar?"MAC حسب العمر":"age-based MAC"):(o.min===o.max?o.min:o.min+"–"+o.max)+" "+o.unit+(o.cap?" ("+(ar?"حد أقصى ":"max ")+o.cap+")":"");
+rows+="<tr><td>"+(i?"":"<strong>"+esc(d["name_"+currentLang])+"</strong>")+"</td><td>"+esc(o[currentLang])+"</td><td>"+esc(rg)+"</td><td>"+(i?"":esc(d.ref||"—"))+"</td></tr>"; }); });
+h+="<h4>"+TYPES[t].e+" "+TYPES[t][currentLang]+'</h4><table class="help-table"><tr><th>'+(ar?"الدواء":"Drug")+"</th><th>"+(ar?"الاستخدام":"Use")+"</th><th>"+(ar?"النطاق":"Range")+"</th><th>"+(ar?"المرجع":"Reference")+"</th></tr>"+rows+"</table>"; });
+return h+"<p>"+(ar?"النطاقات أعلاه غير معتمدة سريرياً (انظر القسم 15). الأدوية الأصلية لا يوجد لها مرجع مسجّل.":"Ranges above are not clinically approved (see section 15). Original drugs have no recorded reference.")+"</p></div>"; }
+function buildDrugList(){ var ar=currentLang==="ar", prevT=anTypeEl.value||"general";
+anTypeEl.innerHTML=""; Object.keys(TYPES).forEach(function(k){ var o=document.createElement("option"); o.value=k; o.textContent=TYPES[k].e+" "+TYPES[k][currentLang]; anTypeEl.appendChild(o); });
+anTypeEl.value=TYPES[prevT]?prevT:"general"; var t=anTypeEl.value, prevD=drugSelect.value;
+drugSelect.innerHTML=""; Object.keys(DRUGS).forEach(function(k){ if(DRUGS[k].types.indexOf(t)<0) return; var o=document.createElement("option"); o.value=k; o.textContent=DRUGS[k]["name_"+currentLang]; drugSelect.appendChild(o); });
+if(DRUGS[prevD]&&DRUGS[prevD].types.indexOf(t)>-1) drugSelect.value=prevD; else drugSelect.selectedIndex=0;
+$("page-drug").setAttribute("data-type",t);
+$("anTypeHint").textContent = t==="general" ? "" : (ar?"نطاقات مرجعية من مصادر منشورة — تحقق منها مع البروتوكول المحلي قبل الاستخدام على المرضى.":"Reference ranges from published sources — verify against local protocol before patient use."); }
+
+/* ============================================================
+   Helpers
+============================================================ */
+function T(key){ return (I18N[currentLang] && I18N[currentLang][key]) || key; }
+function num(el){ var v=parseFloat(el.value); return isNaN(v)?null:v; }
+function getWeight(){ var w=num(weightEl); return (w!==null && w>=1 && w<=300)?w:null; }
+function getHeight(){ var h=num(heightEl); return (h!==null && h>=50 && h<=250)?h:null; }
+function getAge(){ var a=num(ageEl); return (a!==null && a>=0 && a<=120)?a:null; }
+function calcIBW(h,sex){ if(!h) return null; var inches=h/2.54; var base=(sex==="female")?45.5:50; var ibw=base+2.3*(inches-60); return ibw>0?ibw:null; }
+function calcAdjBW(a,ibw){ if(!a||!ibw||a<=ibw) return null; return ibw+0.4*(a-ibw); }
+function calcLBW(a,h,sex){ if(!a||!h) return null; var bmi=a/Math.pow(h/100,2); if(bmi<=0) return null; var lbw=(sex==="female")?(9270*a)/(8780+244*bmi):(9270*a)/(6680+216*bmi); return lbw>0?lbw:null; }
+function calcBMI(w,h){ if(!w||!h) return null; var m=h/100; return w/(m*m); }
+function bmiCatKey(b){ if(b<18.5) return "bmi_under"; if(b<25) return "bmi_normal"; if(b<30) return "bmi_over"; if(b<35) return "bmi_obese1"; if(b<40) return "bmi_obese2"; return "bmi_morbid"; }
+function fmt(n){ if(n>=100) return n.toFixed(0); if(n>=10) return n.toFixed(1); return n.toFixed(2); }
+function esc(s){ return String(s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+
+/* ============================================================
+   Thyroid & Smoking factors
+============================================================ */
+function getThyroidFactor(d,t){
+if(t==="normal"||!t) return 1.0;
+if(t==="hypo"){
+if(d==="propofol") return 0.6; if(d==="ketamine") return 0.7;
+if(d==="midazolam") return 0.7; if(d==="fentanyl") return 0.7;
+if(d==="rocuronium") return 0.8; return 1.0;
+}
+if(t==="hyper"){
+if(d==="propofol") return 1.5; if(d==="rocuronium") return 1.4;
+if(d==="atracurium") return 1.3; if(d==="midazolam") return 1.3;
+if(d==="fentanyl") return 1.2; return 1.0;
+}
+return 1.0;
+}
+function getSmokingFactor(d,s){
+if(s==="nonsmoker"||!s) return 1.0;
+if(s==="smoker"){
+if(d==="propofol") return 1.20;
+if(d==="fentanyl") return 1.15;
+if(d==="midazolam") return 1.10;
+return 1.0;
+}
+return 1.0;
+}
+
+/* ============================================================
+   Volatile anesthetic helpers
+   NOTE: Volatile agents are NOT weight-based doses.
+============================================================ */
+function getVolatileMAC(drugId, age){
+if(age===null || age===undefined) return null;
+if(drugId==="sevoflurane"){
+if(age<1/12) return 3.3;
+if(age<0.5) return 3.0;
+if(age<3) return 2.8;
+if(age<12) return 2.5;
+if(age<=25) return 2.6;
+if(age<=40) return 2.1;
+if(age<=60) return 1.7;
+return 1.4;
+}
+if(drugId==="isoflurane"){
+if(age<1/12) return 1.60;
+if(age<0.5) return 1.87;
+if(age<1) return 1.80;
+if(age<6) return 1.60;
+if(age<11) return 1.45;
+if(age<19) return 1.38;
+if(age<=30) return 1.28;
+if(age<=55) return 1.15;
+return 1.05;
+}
+return null;
+}
+function isInhaledDrug(drugId){
+return !!(DRUGS[drugId] && DRUGS[drugId].mode==="inhaled");
+}
+
+/* ============================================================
+   Combined Factor
+============================================================ */
+function computeCombinedFactor(drugId){
+if(isInhaledDrug(drugId)||(DRUGS[drugId]&&DRUGS[drugId].custom)) return {combined:1.0, factors:[]};
+var factors=[];
+var asa=asaEl.value;
+if(asa && ASA_FACTORS[asa]!==undefined && ASA_FACTORS[asa]<1.0){
+factors.push({cls:"f-asa", label:"ASA "+asa.replace("asa",""), value:ASA_FACTORS[asa]});
+}
+var t=thyroidEl.value;
+if(t && t!=="normal"){
+var tf=getThyroidFactor(drugId,t);
+if(tf!==1.0) factors.push({cls:"f-thyroid", label:T("thyroid_label")+" — "+T("thyroid_"+t), value:tf});
+}
+var sm=smokingEl.value;
+if(sm && sm!=="nonsmoker"){
+var sf=getSmokingFactor(drugId,sm);
+if(sf!==1.0) factors.push({cls:"f-smoke", label:T("smoking_label")+" — "+T("smoking_"+sm), value:sf});
+}
+var c=cardiacEl.value;
+if(c && c!=="normal" && CARDIAC_FACTORS[drugId] && CARDIAC_FACTORS[drugId][c]!==undefined){
+var cf=CARDIAC_FACTORS[drugId][c];
+if(cf<1.0) factors.push({cls:"f-heart", label:"🫀 "+T(CARDIAC_KEYS[c]), value:cf});
+}
+var r=respEl.value;
+if(r && r!=="normal" && RESP_FACTORS[drugId] && RESP_FACTORS[drugId][r]!==undefined){
+var rf=RESP_FACTORS[drugId][r];
+if(rf<1.0) factors.push({cls:"f-lung", label:"🫁 "+T(RESP_KEYS[r]), value:rf});
+}
+if(factors.length===0) return {combined:1.0, factors:[]};
+var increase=1.0, decrease=[];
+factors.forEach(function(f){ if(f.value>1.0) increase*=f.value; else decrease.push(f); });
+var combined;
+if(decrease.length===0){ combined=Math.min(increase,1.5); }
+else {
+var minDec=decrease.reduce(function(m,f){ return Math.min(m,f.value); },1.0);
+combined=Math.max(0.35, minDec*Math.min(increase,1.3));
+}
+return {combined:combined, factors:factors};
+}
+
+/* ============================================================
+   Weight basis
+============================================================ */
+function getEffectiveWeight(){
+var w=getWeight(); if(!w) return null;
+var h=getHeight();
+var ibw=calcIBW(h,sexEl.value), adj=calcAdjBW(w,ibw), lbw=calcLBW(w,h,sexEl.value);
+var basis=weightBasisEl.value;
+if(basis==="ideal" && ibw) return {value:ibw, label:T("basis_ideal")};
+if(basis==="adjusted" && adj) return {value:adj, label:T("basis_adjusted")};
+if(basis==="lean" && lbw) return {value:lbw, label:T("basis_lean")};
+return {value:w, label:T("basis_actual")};
+}
+
+/* ============================================================
+   Alerts
+============================================================ */
+function ageAlertHTML(a){
+if(a===null) return "";
+if(a<1) return '<div class="alert alert-danger"><strong>🚨 '+T("age_label")+':</strong> '+(currentLang==="ar"?"رضيع — استخدم مرجعاً متخصصاً.":"Infant — use specialized reference.")+'</div>';
+if(a<12) return '<div class="alert alert-danger"><strong>🚨 '+T("age_label")+':</strong> '+(currentLang==="ar"?"طفل — الجرعات مبنية على البالغين.":"Child — adult-based doses may not apply.")+'</div>';
+if(a<18) return '<div class="alert alert-warn"><strong>⚠️ '+T("age_label")+':</strong> '+(currentLang==="ar"?"مراهق — تحقق من المراجع.":"Adolescent — check references.")+'</div>';
+if(a>=80) return '<div class="alert alert-warn"><strong>⚠️ '+T("age_label")+':</strong> '+(currentLang==="ar"?"مسن متقدم — خفّض الجرعة حتى 50%.":"Elderly — reduce induction up to 50%.")+'</div>';
+if(a>=65) return '<div class="alert alert-warn"><strong>⚠️ '+T("age_label")+':</strong> '+(currentLang==="ar"?"مسن — خفّض الجرعة 20-50%.":"Elderly — reduce dose 20-50%.")+'</div>';
+if(a>=18) return '<div class="alert alert-info"><strong>✓</strong> '+(currentLang==="ar"?"فئة البالغين — جرعات قياسية.":"Adult — standard doses.")+'</div>';
+return "";
+}
+
+function volatileAlertHTML(drugId){
+if(!isInhaledDrug(drugId)) return "";
+var ar=currentLang==="ar", a="";
+var name=drugId==="sevoflurane" ? (ar?"سيفوفلورين":"Sevoflurane") : (ar?"إيزوفلورين":"Isoflurane");
+a+='<div class="alert alert-info"><strong>🫁 '+name+':</strong> '+(ar
+?"يُعطى فقط بواسطة فريق تخدير مدرّب وبمبخر مُعاير للغاز، مع مراقبة مستمرة للـECG وضغط الدم وSpO₂ وETCO₂."
+:"Administer only by trained anesthesia personnel using a calibrated agent-specific vaporizer with continuous ECG, blood pressure, SpO₂ and ETCO₂ monitoring.")+'</div>';
+a+='<div class="alert alert-warn"><strong>⚠️ '+(ar
+?"التركيز ليس جرعة mg/kg؛ اضبطه حسب الاستجابة وعمق التخدير والعمر. الأفيونات وN₂O يخفضان MAC."
+:"Concentration is not an mg/kg dose; titrate to response, anesthetic depth and age. Opioids and N₂O reduce MAC.")+'</div>';
+a+='<div class="alert alert-danger"><strong>🚨 '+(ar
+?"خطر فرط الحرارة الخبيث: يُمنع الاستخدام عند القابلية المعروفة/المشتبه بها. كما أن تثبيط التنفس وهبوط الضغط يعتمدان على الجرعة."
+:"Malignant hyperthermia risk: avoid in known or suspected susceptibility. Respiratory depression and hypotension are dose-related.")+'</div>';
+if(drugId==="sevoflurane"){
+a+='<div class="alert alert-warn"><strong>🫘 '+T("renal_label")+':</strong> '+(ar
+?"استخدم بحذر عند القصور الكلوي وفق النشرة؛ لا تحوّل ذلك إلى معامل جرعة ثابت."
+:"Use caution in renal impairment per labeling; do not convert this into a fixed dose multiplier.")+'</div>';
+a+='<div class="alert alert-info"><strong>🧪:</strong> '+(ar
+?"تأكد من حالة CO₂ absorbent وتجنب الممتصات الجافة؛ تزداد نواتج التحلل مع الجفاف والتركيز ومدة التعرض."
+:"Check the CO₂ absorbent and avoid desiccated absorbent; degradation products increase with dryness, concentration and exposure duration.")+'</div>';
+}
+a+='<div class="alert alert-info"><strong>💪:</strong> '+(ar
+?"العوامل المتطايرة تزيد تأثير المرخيات العضلية؛ تُضبط الجرعات الإضافية وفق TOF/الاستجابة العصبية العضلية."
+:"Volatile agents potentiate neuromuscular blockade; guide supplemental relaxant dosing by TOF/neuromuscular response.")+'</div>';
+return a;
+}
+
+function organAlertHTML(drugId){
+var alerts="", renal=renalEl.value, hepatic=hepaticEl.value;
+var ar=currentLang==="ar";
+if(drugId==="rocuronium"){
+if(hepatic!=="normal") alerts+='<div class="alert alert-warn"><strong>🫀 '+T("hepatic_label")+':</strong> '+(ar?"قد تطول مدة التأثير حتى 1.5 مرة.":"Effect may prolong up to 1.5×.")+'</div>';
+if(renal==="severe"||renal==="moderate") alerts+='<div class="alert alert-warn"><strong>🫘 '+T("renal_label")+':</strong> '+(ar?"تباين في المدة — فضّل سيسأتراكوريوم أو أتراكوريوم.":"Variable duration — prefer cisatracurium or atracurium.")+'</div>';
+}
+if(drugId==="atracurium"&&(renal!=="normal"||hepatic!=="normal")) alerts+='<div class="alert alert-info"><strong>✓ '+(ar?"أتراكوريوم":"Atracurium")+':</strong> '+(ar?"لا يحتاج تعديلاً (إزالة Hofmann).":"No adjustment (Hofmann elimination).")+'</div>';
+if(drugId==="cisatracurium"&&(renal!=="normal"||hepatic!=="normal")) alerts+='<div class="alert alert-info"><strong>✓ '+(ar?"سيسأتراكوريوم":"Cisatracurium")+':</strong> '+(ar?"لا يحتاج تعديلاً (إزالة مستقلة).":"No adjustment (organ-independent).")+'</div>';
+if(drugId==="propofol"&&hepatic!=="normal") alerts+='<div class="alert alert-warn"><strong>🫀 '+T("hepatic_label")+':</strong> '+(ar?"قد يطول التأثير — قلّل الصيانة.":"Effect may prolong — reduce maintenance.")+'</div>';
+if(drugId==="midazolam"&&hepatic!=="normal") alerts+='<div class="alert alert-warn"><strong>🫀 '+T("hepatic_label")+':</strong> '+(ar?"يمتد التأثير بشكل ملحوظ — قلّل الجرعة.":"Markedly prolonged — reduce dose.")+'</div>';
+if(drugId==="fentanyl"&&hepatic!=="normal") alerts+='<div class="alert alert-warn"><strong>🫀 '+T("hepatic_label")+':</strong> '+(ar?"قد يطيل التأثير.":"May prolong effect.")+'</div>';
+if(drugId==="fentanyl"&&(renal==="severe"||renal==="moderate")) alerts+='<div class="alert alert-info"><strong>✓ '+(ar?"فنتانيل":"Fentanyl")+':</strong> '+(ar?"لا يحتاج تعديلاً في القصور الكلوي.":"No adjustment in renal impairment.")+'</div>';
+return alerts;
+}
+
+function cardiacAlertHTML(drugId){
+var c=cardiacEl.value; if(c==="normal") return "";
+var ar=currentLang==="ar", a="";
+if(c==="ihd"){
+if(drugId==="ketamine") a+='<div class="alert alert-heart"><strong>🫀 IHD:</strong> '+(ar?"تجنّب الكيتامين (تسرع قلب). البديل: إيتوميديت.":"Avoid ketamine (tachycardia). Use etomidate.")+'</div>';
+if(drugId==="ephedrine") a+='<div class="alert alert-heart"><strong>🫀 IHD:</strong> '+(ar?"يُمنع الإيفيدرين. استخدم فينيليفرين.":"Ephedrine contraindicated. Use phenylephrine.")+'</div>';
+if(drugId==="fentanyl") a+='<div class="alert alert-info"><strong>🫀 IHD:</strong> '+(ar?"الفنتانيل خيار ممتاز.":"Fentanyl is an excellent choice.")+'</div>';
+}
+if(c==="chf"){
+if(drugId==="propofol") a+='<div class="alert alert-heart"><strong>🫀 CHF:</strong> '+(ar?"تخفيض كبير (50%) — خطر هبوط ضغط.":"Significant reduction (50%) — hypotension risk.")+'</div>';
+if(drugId==="ephedrine") a+='<div class="alert alert-warn"><strong>🫀 CHF:</strong> '+(ar?"قد يزيد الحمل على القلب. استخدم فينيليفرين.":"May increase cardiac load. Use phenylephrine.")+'</div>';
+}
+if(c==="htn"){
+if(drugId==="ketamine") a+='<div class="alert alert-heart"><strong>🫀 HTN:</strong> '+(ar?"الكيتامين يسبب ارتفاعاً حاداً. تجنّبه.":"Ketamine causes hypertensive crisis. Avoid.")+'</div>';
+if(drugId==="ephedrine") a+='<div class="alert alert-heart"><strong>🫀 HTN:</strong> '+(ar?"يُمنع الإيفيدرين.":"Ephedrine contraindicated.")+'</div>';
+}
+if(c==="arrhythmia"){
+if(drugId==="ketamine") a+='<div class="alert alert-warn"><strong>🫀 '+(ar?"اضطراب نظم":"Arrhythmia")+':</strong> '+(ar?"الكيتامين يسبب تسرع قلب.":"Ketamine causes tachycardia.")+'</div>';
+if(drugId==="ephedrine") a+='<div class="alert alert-warn"><strong>🫀 '+(ar?"اضطراب نظم":"Arrhythmia")+':</strong> '+(ar?"قد يفاقم عدم الانتظام.":"May worsen arrhythmia.")+'</div>';
+}
+if(c==="phtn"){
+if(drugId==="ketamine") a+='<div class="alert alert-heart"><strong>🫀 PH:</strong> '+(ar?"يُمنع الكيتامين — يزيد المقاومة الرئوية.":"Ketamine contraindicated — raises PVR.")+'</div>';
+if(drugId==="ephedrine") a+='<div class="alert alert-heart"><strong>🫀 PH:</strong> '+(ar?"تجنّب الإيفيدرين.":"Avoid ephedrine.")+'</div>';
+}
+return a;
+}
+
+function respAlertHTML(drugId){
+var r=respEl.value; if(r==="normal") return "";
+var ar=currentLang==="ar", a="";
+if(r==="asthma"){
+if(drugId==="atracurium") a+='<div class="alert alert-lung"><strong>🫁 '+(ar?"ربو":"Asthma")+':</strong> '+(ar?"الأتراكوريوم يُحرّر الهيستامين — فضّل سيسأتراكوريوم.":"Atracurium releases histamine — prefer cisatracurium.")+'</div>';
+if(drugId==="ketamine"||drugId==="propofol") a+='<div class="alert alert-info"><strong>🫁 '+(ar?"ربو":"Asthma")+':</strong> '+(ar?"يوسّع القصبات — مفيد.":"Bronchodilator — beneficial.")+'</div>';
+}
+if(r==="copd"){
+if(drugId==="fentanyl") a+='<div class="alert alert-lung"><strong>🫁 COPD:</strong> '+(ar?"خفّض الفنتانيل 30% — خطر احتباس CO₂.":"Reduce fentanyl 30% — CO₂ retention risk.")+'</div>';
+if(drugId==="midazolam") a+='<div class="alert alert-lung"><strong>🫁 COPD:</strong> '+(ar?"خفّض الميدازولام 20%.":"Reduce midazolam 20%.")+'</div>';
+}
+if(r==="osa"){
+if(drugId==="fentanyl") a+='<div class="alert alert-lung"><strong>🫁 OSA:</strong> '+(ar?"خفّض الفنتانيل 40% — خطر انسداد مجرى هوائي.":"Reduce fentanyl 40% — airway obstruction risk.")+'</div>';
+if(drugId==="midazolam") a+='<div class="alert alert-lung"><strong>🫁 OSA:</strong> '+(ar?"خفّض الميدازولام 40%.":"Reduce midazolam 40%.")+'</div>';
+if(drugId==="propofol") a+='<div class="alert alert-warn"><strong>🫁 OSA:</strong> '+(ar?"خفّض البروبوفول 20%.":"Reduce propofol 20%.")+'</div>';
+}
+if(r==="uri") a+='<div class="alert alert-warn"><strong>🫁 URI:</strong> '+(ar?"فكّر بتأجيل الجراحة الاختيارية.":"Consider postponing elective surgery.")+'</div>';
+return a;
+}
+
+function thyroidAlertHTML(drugId,t){
+if(t==="normal") return "";
+var ar=currentLang==="ar", a="";
+if(t==="hypo"){
+if(drugId==="propofol") a+='<div class="alert alert-warn"><strong>🦋 '+(ar?"قصور الغدة":"Hypothyroidism")+':</strong> '+(ar?"حساسية متزايدة — خُفّضت 40%.":"Increased sensitivity — reduced 40%.")+'</div>';
+if(drugId==="ketamine") a+='<div class="alert alert-info"><strong>🦋 '+(ar?"قصور الغدة":"Hypothyroidism")+':</strong> '+(ar?"الكيتامين مفيد — خُفّضت 30%.":"Ketamine beneficial — reduced 30%.")+'</div>';
+if(drugId==="midazolam"||drugId==="fentanyl") a+='<div class="alert alert-warn"><strong>🦋 '+(ar?"قصور الغدة":"Hypothyroidism")+':</strong> '+(ar?"خُفّضت 30%.":"Reduced 30%.")+'</div>';
+if(drugId==="rocuronium") a+='<div class="alert alert-warn"><strong>🦋 '+(ar?"قصور الغدة":"Hypothyroidism")+':</strong> '+(ar?"خُفّضت 20%. راقب TOF.":"Reduced 20%. Monitor TOF.")+'</div>';
+}
+if(t==="hyper"){
+if(drugId==="propofol") a+='<div class="alert alert-warn"><strong>🦋 '+(ar?"فرط النشاط":"Hyperthyroidism")+':</strong> '+(ar?"جرعة أعلى ×1.5.":"Higher dose ×1.5.")+'</div>';
+if(drugId==="ketamine") a+='<div class="alert alert-danger"><strong>🦋 '+(ar?"فرط النشاط":"Hyperthyroidism")+':</strong> '+(ar?"تجنّب الكيتامين — خطر ارتفاع ضغط حاد.":"Avoid ketamine — hypertensive crisis risk.")+'</div>';
+if(drugId==="ephedrine") a+='<div class="alert alert-danger"><strong>🦋 '+(ar?"فرط النشاط":"Hyperthyroidism")+':</strong> '+(ar?"تجنّب الإيفيدرين.":"Avoid ephedrine.")+'</div>';
+if(drugId==="midazolam"||drugId==="fentanyl") a+='<div class="alert alert-warn"><strong>🦋 '+(ar?"فرط النشاط":"Hyperthyroidism")+':</strong> '+(ar?"جرعة أعلى قليلاً.":"Slightly higher dose.")+'</div>';
+if(drugId==="rocuronium") a+='<div class="alert alert-warn"><strong>🦋 '+(ar?"فرط النشاط":"Hyperthyroidism")+':</strong> '+(ar?"جرعات أكبر ×1.4.":"Larger doses ×1.4.")+'</div>';
+if(drugId==="atracurium") a+='<div class="alert alert-warn"><strong>🦋 '+(ar?"فرط النشاط":"Hyperthyroidism")+':</strong> '+(ar?"جرعة أعلى ×1.3.":"Higher dose ×1.3.")+'</div>';
+}
+return a;
+}
+
+function smokingAlertHTML(drugId,s){
+if(s==="nonsmoker") return "";
+var ar=currentLang==="ar", a="";
+if(s==="smoker"){
+if(drugId==="propofol") a+='<div class="alert alert-warn"><strong>🚬 '+(ar?"مدخن":"Smoker")+':</strong> '+(ar?"قد يحتاج جرعة أعلى من البروبوفول (تحمّل، تحريض إنزيمي) — ×1.20.":"May need higher propofol (tolerance, enzyme induction) — ×1.20.")+'</div>';
+if(drugId==="fentanyl") a+='<div class="alert alert-warn"><strong>🚬 '+(ar?"مدخن":"Smoker")+':</strong> '+(ar?"قد يحتاج جرعة أعلى قليلاً — ×1.15.":"May need slightly higher dose — ×1.15.")+'</div>';
+if(drugId!=="propofol"&&drugId!=="fentanyl") a+='<div class="alert alert-info"><strong>🚬 '+(ar?"مدخن":"Smoker")+':</strong> '+(ar?"تأثير محدود على هذا الدواء.":"Minimal effect on this drug.")+'</div>';
+}
+return a;
+}
+
+/* ============================================================
+   Update hints
+============================================================ */
+function updateAsaHint(){
+var map={asa1:"asa_h1",asa2:"asa_h2",asa3:"asa_h3",asa4:"asa_h4",asa5:"asa_h5"};
+var h={ar:{asa_h1:"جرعات قياسية (×1.0)",asa_h2:"تخفيض طفيف 10% (×0.9)",asa_h3:"تخفيض 25% (×0.75) — معايرة دقيقة",asa_h4:"تخفيض 45% (×0.55) — اختيار أدوية بعناية",asa_h5:"تخفيض 65% (×0.35) — اعتبارات خاصة"},
+en:{asa_h1:"Standard doses (×1.0)",asa_h2:"Minor reduction 10% (×0.9)",asa_h3:"25% reduction (×0.75) — titrate carefully",asa_h4:"45% reduction (×0.55) — choose drugs carefully",asa_h5:"65% reduction (×0.35) — special considerations"}};
+asaHint.textContent = h[currentLang][map[asaEl.value]] || "";
+}
+function updateSmokingHint(){
+var h={ar:{nonsmoker:"",smoker:"المدخنون قد يحتاجون جرعة أعلى من البروبوفول والفنتانيل. خطر PONV أقل.",exsmoker:"يُعامل كغير مدخن لخطر PONV."},
+en:{nonsmoker:"",smoker:"Smokers may need higher propofol/fentanyl doses. Lower PONV risk.",exsmoker:"Treated as non-smoker for PONV risk."}};
+smokingHint.textContent = h[currentLang][smokingEl.value] || "";
+}
+function updateCardiacHint(){
+var h={ar:{normal:"",ihd:"IHD: تجنّب تسرع القلب. الفنتانيل مفيد. تجنّب الإيفيدرين.",chf:"قصور قلب: تخفيض كبير للجرعات.",htn:"HTN غير مضبوط: تجنّب الإيفيدرين والكيتامين.",arrhythmia:"حذر مع محفزات القلب.",phtn:"PH: تجنّب الكيتامين والإيفيدرين وN2O."},
+en:{normal:"",ihd:"IHD: Avoid tachycardia. Fentanyl beneficial. Avoid ephedrine.",chf:"Heart failure: significant dose reduction.",htn:"Uncontrolled HTN: Avoid ephedrine and ketamine.",arrhythmia:"Caution with cardiac stimulants.",phtn:"PH: Avoid ketamine, ephedrine, N2O."}};
+cardiacHint.textContent = h[currentLang][cardiacEl.value] || "";
+}
+function updateRespiratoryHint(){
+var h={ar:{normal:"",asthma:"ربو: تجنّب محررات الهيستامين. الكيتامين مفيد.",copd:"COPD: خفّض الأفيونات 30%.",osa:"OSA: خفّض الأفيونات والمهدئات 40%.",uri:"URI: فكّر بتأجيل الجراحة."},
+en:{normal:"",asthma:"Asthma: avoid histamine releasers. Ketamine beneficial.",copd:"COPD: reduce opioids 30%.",osa:"OSA: reduce opioids/sedatives 40%.",uri:"URI: consider postponing surgery."}};
+respHint.textContent = h[currentLang][respEl.value] || "";
+}
+function updateThyroidHint(){
+var h={ar:{normal:"",hypo:"قصور الغدة: خفّض الجرعات وادخل ببطء.",hyper:"فرط النشاط: تجنّب الكيتامين والإيفيدرين."},
+en:{normal:"",hypo:"Hypothyroidism: reduce doses and inject slowly.",hyper:"Hyperthyroidism: avoid ketamine and ephedrine."}};
+thyroidHint.textContent = h[currentLang][thyroidEl.value] || "";
+}
+
+/* ============================================================
+   Body Info
+============================================================ */
+function updateBodyInfo(){
+var w=getWeight(), h=getHeight(), a=getAge(), sex=sexEl.value;
+var bmi=calcBMI(w,h), ibw=calcIBW(h,sex), adj=calcAdjBW(w,ibw), lbw=calcLBW(w,h,sex);
+
+if(bmi){ bmiVal.textContent=bmi.toFixed(1); bmiCat.textContent=bmiCategory(bmi); }
+else { bmiVal.textContent="—"; bmiCat.textContent="kg/m²"; }
+ibwVal.textContent = ibw?ibw.toFixed(1):"—";
+abwVal.textContent = adj?adj.toFixed(1):"—";
+lbwVal.textContent = lbw?lbw.toFixed(1):"—";
+
+var alerts="";
+var ar=currentLang==="ar";
+if(bmi&&bmi>=30) alerts+='<div class="alert alert-warn"><strong>⚖️ BMI '+bmi.toFixed(1)+':</strong> '+(ar?"استخدم LBW أو IBW للبروبوفول والفنتانيل.":"Use LBW or IBW for propofol/fentanyl.")+'</div>';
+if(bmi&&bmi<18.5) alerts+='<div class="alert alert-warn"><strong>⚖️ BMI '+bmi.toFixed(1)+':</strong> '+(ar?"نقص وزن — جرعات أقل.":"Underweight — lower doses.")+'</div>';
+if(bmi&&bmi>=40) alerts+='<div class="alert alert-danger"><strong>⚠️ BMI '+bmi.toFixed(1)+':</strong> '+(ar?"سمنة مفرطة — تجنّب الوزن الفعلي للبروبوفول.":"Morbid obesity — avoid ABW for propofol.")+'</div>';
+alerts+=ageAlertHTML(a);
+bodyAlerts.innerHTML=alerts;
+}
+function bmiCategory(b){
+var ar=currentLang==="ar";
+if(b<18.5) return ar?"نقص وزن":"Underweight";
+if(b<25) return ar?"وزن طبيعي":"Normal";
+if(b<30) return ar?"زيادة وزن":"Overweight";
+if(b<35) return ar?"سمنة 1":"Obese I";
+if(b<40) return ar?"سمنة 2":"Obese II";
+return ar?"سمنة مفرطة":"Morbid obesity";
+}
+
+/* ============================================================
+   Weight Basis Options
+============================================================ */
+function refreshBasisOptions(){
+var w=getWeight(), h=getHeight();
+var ibw=calcIBW(h,sexEl.value), adj=calcAdjBW(w,ibw), lbw=calcLBW(w,h,sexEl.value);
+var io=weightBasisEl.querySelector('option[value="ideal"]');
+var ao=weightBasisEl.querySelector('option[value="adjusted"]');
+var lo=weightBasisEl.querySelector('option[value="lean"]');
+if(!io||!ao||!lo) return;
+io.disabled=!ibw; ao.disabled=!adj; lo.disabled=!lbw;
+if(io.disabled&&weightBasisEl.value==="ideal") weightBasisEl.value="actual";
+if(ao.disabled&&weightBasisEl.value==="adjusted") weightBasisEl.value="actual";
+if(lo.disabled&&weightBasisEl.value==="lean") weightBasisEl.value="actual";
+}
+
+/* ============================================================
+   Dose options
+============================================================ */
+function updateDoseOptions(){
+buildDrugList();
+var key=drugSelect.value;
+if(!key||!DRUGS[key]){ key=DEFAULT_DRUG; drugSelect.value=DEFAULT_DRUG; }
+var drug=DRUGS[key];
+doseSelect.innerHTML="";
+visibleOptions(drug).forEach(function(o){
+var opt=document.createElement("option");
+opt.value=o.id;
+opt.textContent=o[currentLang];
+doseSelect.appendChild(opt);
+});
+var inhaled=isInhaledDrug(key);
+var basisField=$("weightBasisField");
+if(basisField) basisField.classList.toggle("hidden", inhaled);
+if(inhaled) weightBasisEl.value="actual";
+basisHint.textContent = drug["hint_"+currentLang] || drug.hint_ar;
+var note=drug["hint_"+currentLang] || "";
+if(inhaled){
+var mac=getVolatileMAC(key,getAge());
+if(mac!==null){
+note += " " + (currentLang==="ar"
+? "MAC التقريبي في الأكسجين لهذا العمر: "+mac.toFixed(2)+"%."
+: "Approximate MAC in oxygen for this age: "+mac.toFixed(2)+"%.");
+}
+}
+clinicalNote.textContent=note;
+updateRangeText();
+}
+function updateRangeText(){
+var drug=DRUGS[drugSelect.value];
+if(!drug){ doseRangeText.textContent=""; return; }
+var opt=drug.options.find(function(o){ return o.id===doseSelect.value; });
+if(!opt){ doseRangeText.textContent=""; return; }
+if(opt.mode==="mac"){
+var mac=getVolatileMAC(drugSelect.value,getAge());
+doseRangeText.textContent = mac===null
+? (currentLang==="ar" ? "أدخل العمر لعرض MAC المرجعي." : "Enter age to display the reference MAC.")
+: (currentLang==="ar" ? "MAC المرجعي في O₂: "+mac.toFixed(2)+"%" : "Reference MAC in O₂: "+mac.toFixed(2)+"%");
+return;
+}
+doseRangeText.textContent = T("range_lbl")+": "+(opt.min===opt.max?opt.min:opt.min+" – "+opt.max)+" "+opt.unit+(opt.cap?" ("+(currentLang==="ar"?"حد أقصى ":"max ")+opt.cap+")":"");
+}
+
+/* ============================================================
+   PONV
+============================================================ */
+function updatePONVStyling(){
+var items=[[ponvFemale,"ponvFemaleLabel"],[ponvNonSmoker,"ponvNonSmokerLabel"],[ponvHistory,"ponvHistoryLabel"],[ponvOpioids,"ponvOpioidsLabel"]];
+items.forEach(function(it){
+var lbl=$(it[1]); if(!lbl) return;
+if(it[0].checked) lbl.classList.add("checked");
+else lbl.classList.remove("checked");
+});
+}
+function calculatePONV(){
+var score=0;
+if(ponvFemale.checked) score++;
+if(ponvNonSmoker.checked) score++;
+if(ponvHistory.checked) score++;
+if(ponvOpioids.checked) score++;
+
+var ar=currentLang==="ar";
+var risk=[], rec=[];
+if(ar){
+risk=["خطر منخفض — ~10%","خطر منخفض-متوسط — ~21%","خطر متوسط — ~39%","خطر مرتفع — ~61%","خطر مرتفع جداً — ~79%"];
+rec=["لا حاجة لوقاية روتينية.","مضاد واحد (أوندانسيترون 4 mg أو ديكساميثازون 4-8 mg).","مضادان (أوندانسيترون + ديكساميثازون).","مضادان أو ثلاثة. فكّر في TIVA بالبروبوفول.","ثلاثة مضادات. TIVA وتجنّب N2O والأفيونات."];
+} else {
+risk=["Low risk — ~10%","Low-moderate — ~21%","Moderate — ~39%","High — ~61%","Very high — ~79%"];
+rec=["No routine prophylaxis needed.","Single antiemetic (ondansetron 4 mg or dexamethasone 4-8 mg).","Two antiemetics (ondansetron + dexamethasone).","Two or three antiemetics. Consider TIVA with propofol.","Three antiemetics. TIVA and avoid N2O and opioids."];
+}
+ponvScoreEl.textContent=score;
+ponvRiskLevel.textContent=risk[score];
+ponvRecommend.textContent=rec[score];
+ponvResult.classList.remove("hidden");
+}
+
+/* ============================================================
+   Calculate
+============================================================ */
+function calculate(){
+try{
+var w=getWeight(), age=getAge(), ok=true;
+if(w===null){ weightErr.classList.add("show"); weightEl.style.borderColor="#c0392b"; ok=false; }
+else { weightErr.classList.remove("show"); weightEl.style.borderColor=""; }
+if(age===null){ ageErr.classList.add("show"); ageEl.style.borderColor="#c0392b"; ok=false; }
+else { ageErr.classList.remove("show"); ageEl.style.borderColor=""; }
+if(!ok){ return false; }
+
+var key=drugSelect.value;
+if(!DRUGS[key]){ key=DEFAULT_DRUG; drugSelect.value=DEFAULT_DRUG; updateDoseOptions(); }
+var drug=DRUGS[key];
+var opt=drug.options.find(function(o){ return o.id===doseSelect.value; }) || drug.options[0];
+if(!opt) return false;
+
+var eff=getEffectiveWeight(); if(!eff) return false;
+
+var cf=computeCombinedFactor(key);
+var factor=cf.combined;
+var isInhaled=isInhaledDrug(key);
+var isMac=opt.mode==="mac";
+var minDose, maxDose, displayUnit, capFlag=null;
+
+if(isMac){
+var mac=getVolatileMAC(key,age);
+if(mac===null) throw new Error(currentLang==="ar" ? "العمر مطلوب لحساب MAC المرجعي." : "Age is required for the reference MAC.");
+minDose=maxDose=mac;
+displayUnit="% MAC";
+}else if(isInhaled){
+minDose=opt.min;
+maxDose=opt.max;
+displayUnit=opt.unit;
+}else{
+var isFixed=(FIXED_UNITS.indexOf(opt.unit)>-1);
+minDose = isFixed ? opt.min*factor : eff.value*opt.min*factor;
+maxDose = isFixed ? opt.max*factor : eff.value*opt.max*factor;
+displayUnit="mg";
+if(opt.unit==="mcg/kg/min") displayUnit="mcg/min";
+else if(opt.unit==="mg/kg/hr") displayUnit="mg/hr";
+else if(opt.unit==="mcg/kg/hr") displayUnit="mcg/hr";
+else if(opt.unit==="mcg/kg") displayUnit="mcg";
+else if(opt.unit==="mg/kg") displayUnit="mg";
+if(isFixed) displayUnit=opt.unit; else if(opt.unit.slice(-3)==="/kg"&&opt.unit.split("/").length===2) displayUnit=opt.unit.split("/")[0];
+if(opt.cap){ if(maxDose>opt.cap){maxDose=opt.cap;capFlag=opt.cap;} if(minDose>opt.cap){minDose=opt.cap;capFlag=opt.cap;} }
+}
+
+resultValue.textContent = (opt.min===opt.max) ? fmt(minDose) : fmt(minDose)+" – "+fmt(maxDose);
+resultUnit.textContent = displayUnit;
+resultNote.textContent = drug["name_"+currentLang]+" · "+opt[currentLang];
+
+if(isInhaled){
+if(isMac){
+resultWeight.innerHTML = "<strong>"+(currentLang==="ar"?"MAC المرجعي حسب العمر":"Age-based reference MAC")+"</strong> · "+fmt(minDose)+"%";
+}else{
+resultWeight.innerHTML = "<strong>"+(currentLang==="ar"?"تركيز الاستنشاق":"Inhaled concentration")+"</strong> · "+opt.min+"–"+opt.max+" "+opt.unit+" · "+(currentLang==="ar"?"لا يُحسب على الوزن":"Not weight-based");
+}
+}else if(FIXED_UNITS.indexOf(opt.unit)>-1){
+resultWeight.innerHTML = "<strong>"+T("fixed_dose")+"</strong> · "+T("range_lbl")+": "+opt.min+"–"+opt.max+" "+opt.unit;
+} else {
+resultWeight.innerHTML = T("weight_used")+": <strong>"+fmt(eff.value)+" kg</strong> — "+esc(eff.label)+" · "+T("range_lbl")+": "+opt.min+"–"+opt.max+" "+opt.unit;
+}
+
+if(!isInhaled && RATE_UNITS.indexOf(opt.unit)>-1) resultWeight.innerHTML += "<br><strong>"+(currentLang==="ar"?"المعدل لكل كغ بعد المعاملات":"Per-kg rate after factors")+"</strong> · "+fmt(minDose/eff.value)+(opt.min===opt.max?"":" – "+fmt(maxDose/eff.value))+" "+opt.unit;
+
+if(!isInhaled && cf.factors.length>0){
+var lines=cf.factors.map(function(f){
+var pct=Math.round((f.value-1)*100);
+return '<span class="factor-line '+f.cls+'">'+esc(f.label)+' : '+(pct>0?"+":"")+pct+'%</span>';
+}).join("");
+var totalPct=Math.round((factor-1)*100);
+resultFactors.classList.remove("hidden");
+resultFactors.innerHTML = "<strong>"+T("applied_factors")+":</strong><br>"+lines+
+'<hr style="border:none;border-top:1px solid #e6c85a;margin:6px 0">'+
+'<strong>'+T("total_factor")+': '+(totalPct>0?"+":"")+totalPct+'%</strong>';
+} else {
+resultFactors.classList.add("hidden");
+resultFactors.innerHTML="";
+}
+
+var r="";
+if(capFlag!==null) r+='<div class="alert alert-danger"><strong>⛔</strong> '+(currentLang==="ar"?"طُبّق الحد الأقصى المطلق للجرعة: ":"Absolute maximum dose applied: ")+capFlag+" "+displayUnit+"</div>";
+var bmi=calcBMI(getWeight(),getHeight());
+if(bmi&&bmi>=30&&weightBasisEl.value==="actual"&&!isFixed){
+r+='<div class="alert alert-warn"><strong>⚖️</strong> '+(currentLang==="ar"?"المريض بدين — فكّر باستخدام LBW أو IBW.":"Obese patient — consider LBW or IBW.")+'</div>';
+}
+if(opt.grp!=="p") r+=ageAlertHTML(age);
+if(drug.custom){ r+=customAlertHTML(drug,opt,age); } else {
+r+=organAlertHTML(key);
+r+=volatileAlertHTML(key);
+r+=cardiacAlertHTML(key);
+r+=respAlertHTML(key);
+r+=thyroidAlertHTML(key, thyroidEl.value);
+r+=smokingAlertHTML(key, smokingEl.value);
+}
+resultAlerts.innerHTML=r;
+
+lastResult = {
+drug: key, doseId: opt.id, minDose: minDose, maxDose: maxDose,
+unit: displayUnit, opt: opt, eff: eff, factors: cf.factors, totalFactor: factor,
+alerts: r
+};
+
+resultEmpty.classList.add("hidden");
+resultContent.classList.remove("hidden");
+return true;
+} catch(e){
+console.error(e);
+resultEmpty.classList.add("hidden");
+resultContent.classList.remove("hidden");
+resultValue.textContent="Error";
+resultUnit.textContent="";
+resultNote.textContent=String(e.message||e);
+resultWeight.innerHTML="";
+resultFactors.classList.add("hidden");
+resultAlerts.innerHTML='<div class="alert alert-danger">'+esc(String(e.message||e))+'</div>';
+return false;
+}
+}
+
+/* ============================================================
+   Pages / Nav
+============================================================ */
+function showPage(name){
+currentPage=name;
+document.querySelectorAll(".page").forEach(function(p){ p.classList.remove("active"); });
+var el=$("page-"+name); if(el) el.classList.add("active");
+document.querySelectorAll(".tab, .tab-util").forEach(function(t){ t.classList.remove("active"); });
+var activeTab=document.querySelector('.tab[data-page="'+name+'"]') || document.querySelector('.tab-util[data-page="'+name+'"]');
+if(activeTab) activeTab.classList.add("active");
+
+// Wizard nav visibility
+var idx=WIZARD.indexOf(name);
+if(idx>=0){
+wizardNav.classList.remove("hidden");
+prevBtn.disabled = idx===0;
+nextBtn.disabled = false;
+if(name==="drug"){ nextBtn.textContent = T("btn_calc"); }
+else if(name==="result"){ nextBtn.textContent = T("btn_next"); nextBtn.disabled=true; }
+else { nextBtn.textContent = T("btn_next"); }
+} else {
+wizardNav.classList.add("hidden");
+}
+window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function goNext(){
+var idx=WIZARD.indexOf(currentPage);
+if(idx<0) return;
+if(currentPage==="drug"){ if(calculate()) showPage("result"); return; }
+if(idx<WIZARD.length-1) showPage(WIZARD[idx+1]);
+}
+function goPrev(){
+var idx=WIZARD.indexOf(currentPage);
+if(idx>0) showPage(WIZARD[idx-1]);
+}
+
+/* ============================================================
+   Language
+============================================================ */
+function applyLanguage(){
+document.documentElement.lang = currentLang;
+document.documentElement.dir = currentLang==="ar" ? "rtl" : "ltr";
+
+// data-i18n
+document.querySelectorAll("[data-i18n]").forEach(function(el){
+var k=el.getAttribute("data-i18n");
+var v=T(k); if(v) el.textContent=v;
+});
+// data-i18n-html
+document.querySelectorAll("[data-i18n-html]").forEach(function(el){
+var k=el.getAttribute("data-i18n-html");
+var v=T(k); if(v) el.innerHTML=v;
+});
+// data-i18n-placeholder
+document.querySelectorAll("[data-i18n-placeholder]").forEach(function(el){
+var k=el.getAttribute("data-i18n-placeholder");
+var v=T(k); if(v) el.placeholder=v;
+});
+// help content
+if(helpContent) helpContent.innerHTML = T("help_html") + buildHelpDrugTable();
+
+// Update dynamic components
+updateAsaHint(); updateSmokingHint(); updateCardiacHint(); updateRespiratoryHint(); updateThyroidHint();
+updateBodyInfo(); updateDoseOptions(); updatePONVStyling();
+updateRangeText();
+
+// Re-render alerts if result exists
+if(lastResult){ /* result stays in previous lang; recalc on demand */ }
+
+// Wizard nav btn text
+if(currentPage) showPage(currentPage);
+}
+
+function setLang(lang){
+currentLang=lang;
+document.querySelectorAll(".lang-btn").forEach(function(b){
+b.classList.toggle("active", b.dataset.lang===lang);
+});
+try{ localStorage.setItem(STORAGE_KEY+"_lang", lang); }catch(e){}
+applyLanguage();
+}
+
+/* ============================================================
+   Print (A4 Report)
+============================================================ */
+function buildPrintReport(){
+var ar = currentLang==="ar";
+var date = new Date().toLocaleDateString(ar?"ar-EG":"en-GB");
+
+function row(label, val){ return '<tr><td>'+esc(label)+'</td><td>'+esc(val||"—")+'</td></tr>'; }
+function block(title, rows){ return '<div class="pr-block"><h3>'+esc(title)+'</h3><table class="pr-table">'+rows+'</table></div>'; }
+
+// Patient
+var wv = weightEl.value || "—";
+var hv = heightEl.value || "—";
+var av = ageEl.value || "—";
+var sexTxt = sexEl.options[sexEl.selectedIndex] ? sexEl.options[sexEl.selectedIndex].textContent : "—";
+
+var patientRows = "";
+patientRows += row(T("weight_label"), wv+" kg");
+patientRows += row(T("height_label"), hv+" cm");
+patientRows += row(T("age_label"), av+" "+T("year_lbl"));
+patientRows += row(T("sex_label"), sexTxt);
+
+// Clinical
+function selText(el){ var o=el.options[el.selectedIndex]; return o?o.textContent:"—"; }
+var clinicalRows = "";
+clinicalRows += row(T("asa_label"), selText(asaEl));
+clinicalRows += row(T("smoking_label"), selText(smokingEl));
+clinicalRows += row(T("cardiac_label"), selText(cardiacEl));
+clinicalRows += row(T("respiratory_label"), selText(respEl));
+clinicalRows += row(T("renal_label"), selText(renalEl));
+clinicalRows += row(T("hepatic_label"), selText(hepaticEl));
+clinicalRows += row(T("thyroid_label"), selText(thyroidEl));
+
+// Drug
+var drugKey = drugSelect.value;
+var drug = DRUGS[drugKey] || DRUGS[DEFAULT_DRUG];
+var opt = drug.options.find(function(o){ return o.id===doseSelect.value; }) || drug.options[0];
+var drugRows = "";
+drugRows += row(T("drug_label"), drug["name_"+currentLang]);
+drugRows += row(T("dose_label"), opt?opt[currentLang]:"—");
+drugRows += row(T("basis_label"), selText(weightBasisEl));
+
+// Body
+var bmi = calcBMI(getWeight(),getHeight());
+var ibw = calcIBW(getHeight(),sexEl.value);
+var adj = calcAdjBW(getWeight(), ibw);
+var lbw = calcLBW(getWeight(), getHeight(), sexEl.value);
+var bodyRows = "";
+bodyRows += row("BMI", bmi?bmi.toFixed(1)+" kg/m² ("+bmiCategory(bmi)+")":"—");
+bodyRows += row("IBW", ibw?ibw.toFixed(1)+" kg":"—");
+bodyRows += row("AdjBW", adj?adj.toFixed(1)+" kg":"—");
+bodyRows += row("LBW", lbw?lbw.toFixed(1)+" kg":"—");
+
+// Result
+var resultBlock = "";
+if(lastResult){
+var valText;
+if(lastResult.opt.min===lastResult.opt.max) valText=fmt(lastResult.minDose);
+else valText=fmt(lastResult.minDose)+" – "+fmt(lastResult.maxDose);
+resultBlock = '<div class="pr-result"><div class="pr-result-value">'+valText+'</div>'+
+'<div class="pr-result-unit">'+esc(lastResult.unit)+'</div>'+
+'<div class="pr-result-note">'+esc(drug["name_"+currentLang])+' · '+esc(opt[currentLang])+'</div></div>';
+if(lastResult.factors.length>0){
+var fl = lastResult.factors.map(function(f){
+var p=Math.round((f.value-1)*100); return '<div>'+esc(f.label)+': '+(p>0?"+":"")+p+'%</div>';
+}).join("");
+resultBlock += '<div class="pr-factors"><strong>'+T("applied_factors")+':</strong>'+fl+'</div>';
+}
+if(lastResult.alerts){
+resultBlock += '<div class="pr-warnings">'+lastResult.alerts+'</div>';
+}
+} else {
+resultBlock = '<div class="pr-block"><h3>'+T("section_result")+'</h3><p style="margin:4px 0">'+T("no_calc")+'</p></div>';
+}
+
+// PONV
+var ponvRows = "";
+if(!ponvResult.classList.contains("hidden")){
+ponvRows += row(T("ponv_score_lbl"), ponvScoreEl.textContent);
+ponvRows += row(T("ponv_risk_lbl"), ponvRiskLevel.textContent);
+} else {
+ponvRows += row(T("ponv_score_lbl"), "—");
+}
+
+var html = '';
+html += '<div class="pr-header">';
+html += '<h1>💉 '+T("report_title")+'</h1>';
+html += '<div class="pr-meta">'+T("sig_date")+' '+esc(date)+'</div>';
+html += '</div>';
+
+html += '<div class="pr-grid">';
+html += '<div class="pr-col">';
+html += block(T("section_patient"), patientRows);
+html += block(T("section_clinical"), clinicalRows);
+html += block(T("section_body"), bodyRows);
+html += '</div>';
+html += '<div class="pr-col">';
+html += block(T("section_drug"), drugRows);
+html += resultBlock;
+html += block(T("section_ponv"), ponvRows);
+html += '</div>';
+html += '</div>';
+
+html += '<div class="pr-signature">';
+html += '<div>'+T("sig_doctor")+' _______________________</div>';
+html += '<div>'+T("sig_date")+' _______________________</div>';
+html += '</div>';
+
+printReport.innerHTML = html;
+}
+
+function doPrint(){
+buildPrintReport();
+window.print();
+}
+
+/* ============================================================
+   Storage
+============================================================ */
+function saveFormData(){
+try{
+var data = {
+weight:weightEl.value, height:heightEl.value, age:ageEl.value, sex:sexEl.value,
+asa:asaEl.value, smoking:smokingEl.value, cardiac:cardiacEl.value, respiratory:respEl.value,
+renal:renalEl.value, hepatic:hepaticEl.value, thyroid:thyroidEl.value,
+anType:anTypeEl.value, drug:drugSelect.value, doseOption:doseSelect.value, weightBasis:weightBasisEl.value,
+ponvFemale:ponvFemale.checked, ponvNonSmoker:ponvNonSmoker.checked,
+ponvHistory:ponvHistory.checked, ponvOpioids:ponvOpioids.checked
+};
+localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}catch(e){}
+}
+
+function restoreFormData(){
+try{
+var raw=localStorage.getItem(STORAGE_KEY); if(!raw) return false;
+var d=JSON.parse(raw); if(!d||typeof d!=="object") return false;
+
+if(d.weight!==undefined) weightEl.value=d.weight;
+if(d.height!==undefined) heightEl.value=d.height;
+if(d.age!==undefined) ageEl.value=d.age;
+if(d.sex) sexEl.value=d.sex;
+if(d.asa && ASA_FACTORS[d.asa]) asaEl.value=d.asa;
+if(d.smoking && ["nonsmoker","smoker","exsmoker"].indexOf(d.smoking)>=0) smokingEl.value=d.smoking;
+if(d.cardiac && (d.cardiac==="normal" || CARDIAC_KEYS[d.cardiac])) cardiacEl.value=d.cardiac;
+if(d.respiratory && (d.respiratory==="normal" || RESP_KEYS[d.respiratory])) respEl.value=d.respiratory;
+if(d.renal) renalEl.value=d.renal;
+if(d.hepatic) hepaticEl.value=d.hepatic;
+if(d.thyroid) thyroidEl.value=d.thyroid;
+if(d.anType && TYPES[d.anType]) anTypeEl.value=d.anType;
+else if(d.drug && DRUGS[d.drug]) anTypeEl.value=DRUGS[d.drug].types[0];
+buildDrugList();
+if(d.drug && DRUGS[d.drug] && DRUGS[d.drug].types.indexOf(anTypeEl.value)>-1) drugSelect.value=d.drug;
+else drugSelect.value=DEFAULT_DRUG;
+
+updateDoseOptions();
+
+if(d.doseOption && DRUGS[drugSelect.value].options.some(function(o){return o.id===d.doseOption;}))
+doseSelect.value=d.doseOption;
+if(d.weightBasis) weightBasisEl.value=d.weightBasis;
+if(d.ponvFemale!==undefined) ponvFemale.checked=!!d.ponvFemale;
+if(d.ponvNonSmoker!==undefined) ponvNonSmoker.checked=!!d.ponvNonSmoker;
+if(d.ponvHistory!==undefined) ponvHistory.checked=!!d.ponvHistory;
+if(d.ponvOpioids!==undefined) ponvOpioids.checked=!!d.ponvOpioids;
+return true;
+}catch(e){ console.warn(e); return false; }
+}
+
+/* ============================================================
+   Stepper
+============================================================ */
+function setupStepper(downId,upId,inputEl,step,minV,maxV){
+var db=$(downId), ub=$(upId); if(!db||!ub) return;
+function adj(delta){
+var c=parseFloat(inputEl.value); if(isNaN(c)) c=minV;
+var n=Math.round((c+delta)*10)/10;
+if(n<minV) n=minV; if(n>maxV) n=maxV;
+inputEl.value=n;
+inputEl.dispatchEvent(new Event("input",{bubbles:true}));
+}
+db.addEventListener("click",function(){ adj(-step); });
+ub.addEventListener("click",function(){ adj(step); });
+}
+
+/* ============================================================
+   Events
+============================================================ */
+// Tabs
+document.querySelectorAll(".tab, .tab-util").forEach(function(t){
+t.addEventListener("click", function(){ showPage(t.dataset.page); });
+});
+
+// Lang buttons
+document.querySelectorAll(".lang-btn").forEach(function(b){
+b.addEventListener("click", function(){ setLang(b.dataset.lang); });
+});
+
+// Wizard
+prevBtn.addEventListener("click", goPrev);
+nextBtn.addEventListener("click", goNext);
+
+// Calc btn
+if(calcBtn) calcBtn.addEventListener("click", function(){ if(calculate()) showPage("result"); });
+printBtn.addEventListener("click", doPrint);
+window.addEventListener("beforeprint", buildPrintReport);
+
+// Drug
+drugSelect.addEventListener("change", function(){ updateDoseOptions(); refreshBasisOptions(); saveFormData(); });
+doseSelect.addEventListener("change", function(){ updateRangeText(); saveFormData(); });
+weightBasisEl.addEventListener("change", saveFormData);
+
+// Inputs
+[weightEl,heightEl].forEach(function(el){
+el.addEventListener("input", function(){
+if(el===weightEl){ weightErr.classList.remove("show"); weightEl.style.borderColor=""; }
+updateBodyInfo(); refreshBasisOptions(); saveFormData();
+});
+});
+ageEl.addEventListener("input", function(){
+ageErr.classList.remove("show"); ageEl.style.borderColor="";
+updateBodyInfo(); updateDoseOptions(); saveFormData();
+});
+sexEl.addEventListener("change", function(){ updateBodyInfo(); refreshBasisOptions(); saveFormData(); });
+asaEl.addEventListener("change", function(){ updateAsaHint(); saveFormData(); });
+smokingEl.addEventListener("change", function(){ updateSmokingHint(); saveFormData(); });
+cardiacEl.addEventListener("change", function(){ updateCardiacHint(); saveFormData(); });
+respEl.addEventListener("change", function(){ updateRespiratoryHint(); saveFormData(); });
+renalEl.addEventListener("change", saveFormData);
+hepaticEl.addEventListener("change", saveFormData);
+thyroidEl.addEventListener("change", function(){ updateThyroidHint(); saveFormData(); });
+
+anTypeEl.addEventListener("change", function(){ drugSelect.value=""; updateDoseOptions(); refreshBasisOptions(); saveFormData(); });
+$("themeBtn").addEventListener("click", function(){ themeMode={system:"light",light:"dark",dark:"system"}[themeMode]; try{localStorage.setItem(THEME_KEY,themeMode);}catch(e){} applyTheme(themeMode); });
+
+// PONV
+[ponvFemale,ponvNonSmoker,ponvHistory,ponvOpioids].forEach(function(cb){
+cb.addEventListener("change", function(){ updatePONVStyling(); saveFormData(); });
+});
+ponvBtn.addEventListener("click", calculatePONV);
+
+/* ============================================================
+   Init
+============================================================ */
+try{
+setupStepper("weightDown","weightUp",weightEl,1,1,300);
+setupStepper("ageDown","ageUp",ageEl,1,0,120);
+
+// Restore lang
+var savedLang = null;
+try{ savedLang = localStorage.getItem(STORAGE_KEY+"_lang"); }catch(e){}
+currentLang = (savedLang==="en"||savedLang==="ar") ? savedLang : "ar";
+document.querySelectorAll(".lang-btn").forEach(function(b){
+b.classList.toggle("active", b.dataset.lang===currentLang);
+});
+
+applyTheme(themeMode);
+buildDrugList();
+var restored = restoreFormData();
+if(!restored){
+if(!drugSelect.value || !DRUGS[drugSelect.value]) drugSelect.value=DEFAULT_DRUG;
+updateDoseOptions();
+}
+updateAsaHint(); updateSmokingHint(); updateCardiacHint(); updateRespiratoryHint(); updateThyroidHint();
+updateBodyInfo(); refreshBasisOptions(); updatePONVStyling();
+
+applyLanguage();
+showPage("patient");
+}catch(e){ console.error("Init error:", e); }
+
+if("serviceWorker" in navigator && location.protocol.indexOf("http")===0) navigator.serviceWorker.register("sw.js").catch(function(){});
+})();
+</script>
+</body>
+</html>
